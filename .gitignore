@@ -40,6 +40,12 @@ wheels/
 *.rar
 setup_mingit.py
 
+# Research Paper Manuscripts (Keep private locally, not on GitHub)
+*.docx
+*.pdf
+paper_latex/
+create_paper_docx.py
+
 # OS-specific
 .DS_Store
 Thumbs.db

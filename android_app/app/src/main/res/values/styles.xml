@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.CCAFApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">#0B1120</item>
+        <item name="android:navigationBarColor">#0F172A</item>
+    </style>
+</resources>

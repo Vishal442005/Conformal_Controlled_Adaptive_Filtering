@@ -1,0 +1,45 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Distribution / Packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Temporary files & logs
+*.log
+~$*
+.system_generated/
+.gemini/
+
+# Large datasets & archive backups (optional to ignore or track via LFS)
+*.zip
+*.tar.gz
+*.rar
+setup_mingit.py
+
+# OS-specific
+.DS_Store
+Thumbs.db

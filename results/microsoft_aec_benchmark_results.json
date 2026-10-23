@@ -1,0 +1,143 @@
+{
+  "scenario_erle": {
+    "NLMS (fast)": {
+      "farend_singletalk": 3.4648100927096643,
+      "farend_singletalk_with_movement": 4.7808753047806185,
+      "doubletalk": -6.383543450818794,
+      "doubletalk_with_movement": -2.9961917002695984
+    },
+    "NLMS (slow)": {
+      "farend_singletalk": 1.5668074174579716,
+      "farend_singletalk_with_movement": 4.051218298474483,
+      "doubletalk": -4.311079496852715,
+      "doubletalk_with_movement": -2.9670262696214844
+    },
+    "Kwong VSS-LMS": {
+      "farend_singletalk": 3.18395491110989,
+      "farend_singletalk_with_movement": 4.033732782200969,
+      "doubletalk": -2.472843315943503,
+      "doubletalk_with_movement": -1.1160352035916892
+    },
+    "Benesty NP-VSS": {
+      "farend_singletalk": 3.579721058103216,
+      "farend_singletalk_with_movement": 4.9051421996054545,
+      "doubletalk": -6.380695671266958,
+      "doubletalk_with_movement": -2.991041801367653
+    },
+    "Convex Combination": {
+      "farend_singletalk": 4.4923060709062,
+      "farend_singletalk_with_movement": 6.006680770596227,
+      "doubletalk": -3.149281798334709,
+      "doubletalk_with_movement": -0.9728610123609382
+    },
+    "Decoupled ACI": {
+      "farend_singletalk": 1.5668074174579716,
+      "farend_singletalk_with_movement": 4.051218298474483,
+      "doubletalk": -4.311079496852715,
+      "doubletalk_with_movement": -2.9670262696214844
+    },
+    "Proposed CCAF-DB": {
+      "farend_singletalk": 1.058793922219294,
+      "farend_singletalk_with_movement": 3.211537839127382,
+      "doubletalk": -7.796291733242977,
+      "doubletalk_with_movement": -4.62389800444233
+    }
+  },
+  "scenario_winkler": {
+    "NLMS (fast)": {
+      "farend_singletalk": 0.09655590081499157,
+      "farend_singletalk_with_movement": 0.08181434417382882,
+      "doubletalk": 0.28166027580839686,
+      "doubletalk_with_movement": 0.29485402859428866
+    },
+    "NLMS (slow)": {
+      "farend_singletalk": 0.10810794934101105,
+      "farend_singletalk_with_movement": 0.09533228830965305,
+      "doubletalk": 0.29074309214094185,
+      "doubletalk_with_movement": 0.3163886136285563
+    },
+    "Kwong VSS-LMS": {
+      "farend_singletalk": 0.10581943642095085,
+      "farend_singletalk_with_movement": 0.09690255423158398,
+      "doubletalk": 0.2795470617749924,
+      "doubletalk_with_movement": 0.286336982665417
+    },
+    "Benesty NP-VSS": {
+      "farend_singletalk": 0.08891247834166452,
+      "farend_singletalk_with_movement": 0.07600650592440651,
+      "doubletalk": 0.26531700334738295,
+      "doubletalk_with_movement": 0.27455843764787374
+    },
+    "Convex Combination": {
+      "farend_singletalk": 0.09099214714465165,
+      "farend_singletalk_with_movement": 0.08009545931519355,
+      "doubletalk": 0.2502224124660939,
+      "doubletalk_with_movement": 0.26677677640533853
+    },
+    "Decoupled ACI": {
+      "farend_singletalk": 0.10745453320462836,
+      "farend_singletalk_with_movement": 0.09478057989332844,
+      "doubletalk": 0.2891103278877397,
+      "doubletalk_with_movement": 0.31461068818505045
+    },
+    "Proposed CCAF-DB": {
+      "farend_singletalk": 0.11542876894893754,
+      "farend_singletalk_with_movement": 0.11111496450287639,
+      "doubletalk": 0.3604841289338399,
+      "doubletalk_with_movement": 0.34923152897957077
+    }
+  },
+  "scenario_coverage": {
+    "NLMS (fast)": {
+      "farend_singletalk": 91.12108165214559,
+      "farend_singletalk_with_movement": 90.99191909866863,
+      "doubletalk": 90.6679836254604,
+      "doubletalk_with_movement": 90.67357522383014
+    },
+    "NLMS (slow)": {
+      "farend_singletalk": 91.36883076593514,
+      "farend_singletalk_with_movement": 91.05465281728513,
+      "doubletalk": 90.77350893203882,
+      "doubletalk_with_movement": 90.7307595855818
+    },
+    "Kwong VSS-LMS": {
+      "farend_singletalk": 91.62560339457818,
+      "farend_singletalk_with_movement": 91.2365047478134,
+      "doubletalk": 90.79786226320559,
+      "doubletalk_with_movement": 90.80622759434348
+    },
+    "Benesty NP-VSS": {
+      "farend_singletalk": 91.31297327164854,
+      "farend_singletalk_with_movement": 91.30871912431844,
+      "doubletalk": 90.87996842886075,
+      "doubletalk_with_movement": 90.90887987560906
+    },
+    "Convex Combination": {
+      "farend_singletalk": 94.52069787750898,
+      "farend_singletalk_with_movement": 94.71929801452617,
+      "doubletalk": 93.84721573049629,
+      "doubletalk_with_movement": 94.24041618954332
+    },
+    "Decoupled ACI": {
+      "farend_singletalk": 90.09961108471416,
+      "farend_singletalk_with_movement": 90.09894619289878,
+      "doubletalk": 90.08417930808221,
+      "doubletalk_with_movement": 90.10594350358392
+    },
+    "Proposed CCAF-DB": {
+      "farend_singletalk": 90.09176193084848,
+      "farend_singletalk_with_movement": 90.11544058771435,
+      "doubletalk": 90.09100945633183,
+      "doubletalk_with_movement": 90.11084056867877
+    }
+  },
+  "tracking_delay_ms": {
+    "NLMS (fast)": 62.875,
+    "NLMS (slow)": 0.0,
+    "Kwong VSS-LMS": 0.0,
+    "Benesty NP-VSS": 62.81249999999999,
+    "Convex Combination": 8.3125,
+    "Decoupled ACI": 0.0,
+    "Proposed CCAF-DB": 0.0
+  }
+}

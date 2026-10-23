@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Active Model Tag -->
+        <TextView
+            android:id="@+id/tvActiveModelTagFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1E293B"
+            android:padding="10dp"
+            android:text="Active Model: Proposed CCAF-DB"
+            android:textColor="@color/accent_emerald"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Select File Button (Universal audio support: WAV, MP3, AAC, FLAC, M4A, OGG) -->
+        <Button
+            android:id="@+id/btnSelectFile"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="#0284C7"
+            android:text="SELECT AUDIO (WAV, MP3, AAC, FLAC, M4A)"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- File Name and Details -->
+        <TextView
+            android:id="@+id/tvFileInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="No file selected. Accepts WAV, MP3, AAC, FLAC, M4A, OGG."
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <!-- 2-Line Waveform Display: Real vs After Model -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Waveform Comparison (Cyan: Original | Amber: After Model):"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <com.research.ccaf.ui.DualWaveformView
+            android:id="@+id/fileWaveformView"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="6dp" />
+
+        <!-- Stats / Metrics -->
+        <TextView
+            android:id="@+id/tvProcessingStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#1E293B"
+            android:padding="10dp"
+            android:text="Select any audio file to run adaptive filtering."
+            android:textColor="@color/text_primary"
+            android:textSize="13sp" />
+
+        <!-- ================= INSTANT SHIFTING SWITCHER ================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="⚡ Instant Audio Shifter (Switch Live While Playing):"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#090E17"
+            android:padding="4dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnShiftOriginal"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:backgroundTint="#0F766E"
+                android:text="🔈 Original File"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnShiftModel"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:backgroundTint="#334155"
+                android:text="🎧 Model Output"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Play / Stop Seamless Playback Button -->
+        <Button
+            android:id="@+id/btnPlaySeamless"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#0284C7"
+            android:enabled="false"
+            android:text="▶️ PLAY AUDIO (ENABLES LIVE SHIFTING)"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Save New File to Memory Button -->
+        <Button
+            android:id="@+id/btnSaveNewFile"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#059669"
+            android:enabled="false"
+            android:text="💾 SAVE PROCESSED FILE TO MEMORY"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</ScrollView>

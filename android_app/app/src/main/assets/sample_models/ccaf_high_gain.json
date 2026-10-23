@@ -1,0 +1,14 @@
+{
+  "name": "CCAF Aggressive Re-convergence",
+  "category": "CONFORMAL VSS",
+  "description": "High-gain conformal feedback variant configured for harsh non-stationary tracking with kappa=16.0.",
+  "parameters": {
+    "taps": 64.0,
+    "muMin": 0.05,
+    "muMax": 0.80,
+    "gamma": 0.01,
+    "alpha": 0.10,
+    "tau": 0.03,
+    "kappa": 16.0
+  }
+}

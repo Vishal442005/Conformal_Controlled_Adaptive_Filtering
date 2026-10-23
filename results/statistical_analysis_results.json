@@ -1,0 +1,134 @@
+{
+  "pairwise_s3": [
+    {
+      "competitor": "Decoupled ACI",
+      "median_diff_db": 4.1867139709215895,
+      "stat": 0.0,
+      "p_raw": 3.7082469167978976e-08,
+      "cliffs_delta": 0.9575,
+      "p_adj": 2.2249481500787386e-07
+    },
+    {
+      "competitor": "NLMS (fast)",
+      "median_diff_db": -6.422055434085452,
+      "stat": 0.0,
+      "p_raw": 3.7082469167978976e-08,
+      "cliffs_delta": -1.0,
+      "p_adj": 2.2249481500787386e-07
+    },
+    {
+      "competitor": "NLMS (slow)",
+      "median_diff_db": 4.1867139709215895,
+      "stat": 0.0,
+      "p_raw": 3.7082469167978976e-08,
+      "cliffs_delta": 0.9575,
+      "p_adj": 2.2249481500787386e-07
+    },
+    {
+      "competitor": "Benesty NP-VSS",
+      "median_diff_db": 1.743565323293213,
+      "stat": 82.0,
+      "p_raw": 1.0724526062833778e-05,
+      "cliffs_delta": 0.605,
+      "p_adj": 1.0724526062833778e-05
+    },
+    {
+      "competitor": "Kwong VSS-LMS",
+      "median_diff_db": -6.255045964351748,
+      "stat": 0.0,
+      "p_raw": 3.7082469167978976e-08,
+      "cliffs_delta": -1.0,
+      "p_adj": 2.2249481500787386e-07
+    },
+    {
+      "competitor": "Convex Combination",
+      "median_diff_db": -6.130844765454812,
+      "stat": 0.0,
+      "p_raw": 3.7082469167978976e-08,
+      "cliffs_delta": -1.0,
+      "p_adj": 2.2249481500787386e-07
+    }
+  ],
+  "friedman": {
+    "statistic": 683.4463636363633,
+    "p_value": 2.2928120838554997e-144,
+    "average_ranks": {
+      "Kwong VSS-LMS": 2.23125,
+      "Decoupled ACI": 2.25,
+      "NLMS (slow)": 2.25,
+      "Benesty NP-VSS": 4.4625,
+      "Convex Combination": 4.925,
+      "Proposed CCAF-DB": 5.0125,
+      "NLMS (fast)": 6.86875
+    }
+  },
+  "coverage_cis": {
+    "S1": {
+      "mean_coverage_pct": 89.99249999999999,
+      "ci_95_low_pct": 89.87174550828466,
+      "ci_95_high_pct": 90.11228769036799
+    },
+    "S3": {
+      "mean_coverage_pct": 89.99499999999999,
+      "ci_95_low_pct": 89.87425880781997,
+      "ci_95_high_pct": 90.11477433014986
+    },
+    "S5": {
+      "mean_coverage_pct": 89.99416666666666,
+      "ci_95_low_pct": 89.87342104105124,
+      "ci_95_high_pct": 90.11394545047968
+    },
+    "S6": {
+      "mean_coverage_pct": 89.99333333333335,
+      "ci_95_low_pct": 89.87258327453925,
+      "ci_95_high_pct": 90.11311657055234
+    }
+  },
+  "emse_summary": {
+    "S1": {
+      "Proposed CCAF-DB": -31.147867342641472,
+      "Decoupled ACI": -35.422906665177926,
+      "NLMS (fast)": -24.28270221725582,
+      "NLMS (slow)": -35.422906665177926,
+      "Benesty NP-VSS": -32.71971657517446,
+      "Kwong VSS-LMS": -39.41119711589124,
+      "Convex Combination": -26.00765091636017
+    },
+    "S3": {
+      "Proposed CCAF-DB": -31.045119947901902,
+      "Decoupled ACI": -35.41650519929572,
+      "NLMS (fast)": -24.282976487441815,
+      "NLMS (slow)": -35.41650519929572,
+      "Benesty NP-VSS": -32.71698325084503,
+      "Kwong VSS-LMS": -24.60187427141732,
+      "Convex Combination": -24.54925784700791
+    },
+    "S5": {
+      "Proposed CCAF-DB": -20.870780880086834,
+      "Decoupled ACI": -25.422884106408723,
+      "NLMS (fast)": -14.282702217255817,
+      "NLMS (slow)": -25.422884106408723,
+      "Benesty NP-VSS": -22.719690304317105,
+      "Kwong VSS-LMS": -30.146544165005412,
+      "Convex Combination": -23.733172342172814
+    },
+    "S6": {
+      "Proposed CCAF-DB": -18.643191934919955,
+      "Decoupled ACI": -26.50298421153584,
+      "NLMS (fast)": -15.357355940432177,
+      "NLMS (slow)": -26.50298421153584,
+      "Benesty NP-VSS": -18.18028793204519,
+      "Kwong VSS-LMS": -31.403433254574008,
+      "Convex Combination": -25.434450192983398
+    }
+  },
+  "s3_recovery_delay_mean": {
+    "Proposed CCAF-DB": 609.35,
+    "Decoupled ACI": 970.95,
+    "NLMS (fast)": 110.475,
+    "NLMS (slow)": 970.95,
+    "Benesty NP-VSS": 88.475,
+    "Kwong VSS-LMS": 1897.0,
+    "Convex Combination": 134.05
+  }
+}

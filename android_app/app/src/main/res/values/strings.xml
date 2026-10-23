@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">CCAF Adaptive Filter</string>
+    <string name="title_live_record">1. Live Record</string>
+    <string name="title_select_file">2. Select File</string>
+    <string name="title_choose_model">3. Choose Model</string>
+    <string name="btn_start_record">START LIVE RECORDING</string>
+    <string name="btn_stop_record">STOP RECORDING</string>
+    <string name="btn_listen_real">Listen Real Audio</string>
+    <string name="btn_listen_model">Listen Changed Audio</string>
+    <string name="btn_save_audio">Save Audio to Storage</string>
+    <string name="btn_select_file">Choose Audio File (.wav)</string>
+    <string name="btn_play_original">Original</string>
+    <string name="btn_play_model">Model</string>
+    <string name="btn_save_new_file">Save New File to Memory</string>
+    <string name="tab_select_model">2. Select Model</string>
+    <string name="tab_add_new_model">1. Add New Model</string>
+    <string name="btn_import_file">Import Model From File (.json)</string>
+    <string name="btn_create_manual">Create Custom Model</string>
+</resources>

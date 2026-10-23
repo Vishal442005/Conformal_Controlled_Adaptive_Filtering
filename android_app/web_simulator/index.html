@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CCAF Adaptive Filter Audio Lab - Pro Simulator</title>
+    <!-- Embedded/Local MP3 encoder library for multi-format export -->
+    <script src="lame.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --surface-color: #1e293b;
+            --surface-card: #283548;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-cyan: #00e5ff;
+            --accent-amber: #ffd600;
+            --accent-emerald: #10b981;
+            --accent-purple: #a855f7;
+            --primary-blue: #0284c7;
+            --alert-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #030712;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        /* Android Phone Chassis */
+        .phone-frame {
+            width: 100%;
+            max-width: 440px;
+            height: 890px;
+            background-color: var(--bg-color);
+            border-radius: 44px;
+            box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.9), 0 0 0 10px #1e293b, 0 0 0 12px #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 34px;
+            background-color: #060a12;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .notch {
+            width: 90px;
+            height: 16px;
+            background-color: #1e293b;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Top Bar */
+        .app-bar {
+            background-color: var(--surface-color);
+            padding: 12px 18px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-bar h1 {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-bar p {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+
+        .badge-live {
+            background-color: #0369a1;
+            color: #e0f2fe;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* Screen Container */
+        .screen-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 16px 20px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Active Model Header Card */
+        .active-model-badge {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active-model-badge .name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .active-model-badge .tag {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background-color: var(--accent-emerald);
+            color: #000;
+        }
+
+        /* Dual Waveform Canvas */
+        .canvas-card {
+            background-color: #090e17;
+            border: 1px solid #243247;
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 165px;
+            display: block;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+
+        .canvas-legend {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot-cyan { width: 10px; height: 10px; border-radius: 50%; background-color: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+        .dot-amber { width: 10px; height: 10px; border-radius: 50%; background-color: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber); }
+
+        /* HUD Metrics */
+        .metrics-hud {
+            background-color: var(--surface-color);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+
+        .metrics-hud span strong {
+            color: var(--accent-cyan);
+        }
+
+        /* Buttons & Controls */
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.12s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            letter-spacing: 0.2px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; }
+        .btn-record-active { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; animation: pulse 1.2s infinite; }
+        .btn-success { background: linear-gradient(135deg, #059669, #047857); color: #fff; }
+        .btn-original { background-color: #0f766e; color: #fff; }
+        .btn-model { background-color: #d97706; color: #fff; }
+        .btn-secondary { background-color: #334155; color: #e2e8f0; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        /* Instant Shifting Switch Bar */
+        .instant-shift-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid #3b82f6;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+        }
+
+        .shift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .shift-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-tag {
+            font-size: 9px;
+            font-weight: 900;
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Fast Seamless Toggle Switch */
+        .toggle-switch-container {
+            display: flex;
+            background-color: #090e17;
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid #334155;
+            position: relative;
+        }
+
+        .toggle-opt {
+            flex: 1;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-opt.active-orig {
+            background-color: #0f766e;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(15, 118, 110, 0.6);
+        }
+
+        .toggle-opt.active-model {
+            background-color: #d97706;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(217, 119, 6, 0.6);
+        }
+
+        /* Preset Fast Audio Feed Selector */
+        .preset-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .preset-btn {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .preset-btn:hover, .preset-btn.active {
+            background-color: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+
+        /* Audio Export Format Selector */
+        .export-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .format-select {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 12px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Cards & Sub-panels */
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .card.proposed {
+            border: 2px solid var(--accent-emerald);
+            background: linear-gradient(145deg, #092016, #1e293b);
+        }
+
+        .card.active-selected {
+            box-shadow: 0 0 0 2px var(--accent-cyan);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card .badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            background-color: #334155;
+            color: #cbd5e1;
+        }
+
+        .card.proposed .badge {
+            background-color: var(--accent-emerald);
+            color: #000;
+        }
+
+        .card p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        /* Choose Model Subtabs */
+        .sub-tab-group {
+            display: flex;
+            background-color: var(--surface-color);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 14px;
+        }
+
+        .sub-tab {
+            flex: 1;
+            padding: 9px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.1s;
+        }
+
+        .sub-tab.active {
+            background-color: var(--primary-blue);
+            color: #fff;
+        }
+
+        /* Form Inputs */
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            background-color: #0b1120;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #fff;
+            padding: 9px 12px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            outline: none;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            height: 64px;
+            background-color: var(--surface-color);
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .nav-item {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .nav-item.active {
+            color: var(--accent-cyan);
+        }
+
+        .nav-icon {
+            font-size: 19px;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <!-- Android Status Bar -->
+    <div class="status-bar">
+        <span>10:30</span>
+        <div class="notch"></div>
+        <span>5G  ⚡ 99%</span>
+    </div>
+
+    <!-- App Top Bar -->
+    <div class="app-bar">
+        <div>
+            <h1>CCAF Adaptive Audio Lab</h1>
+            <p>Real-Time Distribution-Free DSP & Live Shifter</p>
+        </div>
+        <span class="badge-live">DSP ONLINE</span>
+    </div>
+
+    <!-- Screen Container -->
+    <div class="screen-container">
+
+        <!-- ================= OPTION 1: LIVE RECORD ================= -->
+        <div id="screen-live-record" class="screen active">
+            <div class="active-model-badge">
+                <div>
+                    <div style="font-size: 10px; color: var(--text-secondary);">ACTIVE ADAPTIVE MODEL</div>
+                    <div class="name" id="live-model-name">Proposed CCAF-DB</div>
+                </div>
+                <div class="tag" id="live-model-tag">PROPOSED</div>
+            </div>
+
+            <div class="canvas-card">
+                <canvas id="liveCanvas"></canvas>
+                <div class="canvas-legend">
+                    <div class="legend-item"><div class="dot-cyan"></div> Real Audio (Mic)</div>
+                    <div class="legend-item"><div class="dot-amber"></div> After Model (Filtered)</div>
+                </div>
+            </div>
+
+            <div class="metrics-hud">
+                <span>Step <strong id="live-step">0.050</strong></span>
+                <span>Coverage <strong id="live-cov">90.0%</strong></span>
+                <span>Winkler <strong id="live-wink">0.799</strong></span>
+            </div>
+
+            <button id="btnRecordToggle" class="btn btn-primary">
+                🎙️ START LIVE RECORDING
+            </button>
+
+            <p id="liveStatusText" style="text-align: center; font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">
+                Ready. Click Start to begin live audio filtering.
+            </p>
+
+            <!-- Instant Audio Shifter in Live Record -->
+            <div class="instant-shift-card">
+                <div class="shift-header">
+                    <span class="shift-title">⚡ Instant A/B Audio Switcher</span>
+                    <span class="live-tag">SEAMLESS PLAYBACK</span>
+                </div>
+                <div class="toggle-switch-container">
+                    <div id="liveToggleOrig" class="toggle-opt active-orig">
+                        🔈 Real Audio
+                    </div>
+                    <div id="liveToggleModel" class="toggle-opt">
+                        🎧 After Model
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button id="btnLivePlayToggle" class="btn btn-primary" style="margin-bottom: 0;" disabled>
+                    ▶️ Play Recording
+                </button>
+            </div>
+
+            <!-- Multi-Format Audio Export -->
+            <div class="card" style="margin-top: 10px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">💾 Save Processed Audio to Storage:</div>
+                <div class="export-row">
+                    <select id="liveFormatSelect" class="format-select">
+                        <option value="wav">WAV (Lossless 16-bit PCM)</option>
+                        <option value="mp3">MP3 (Compressed 128 kbps)</option>
+                    </select>
+                    <button id="btnSaveRecord" class="btn btn-success" style="flex: 1; margin-bottom: 0;" disabled>
+                        Export File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= OPTION 2: SELECT FILE ================= -->
+        <div id="screen-select-file" class="screen">
+            <div class="active-model-badge">
+                <div>
+                    <div style="font-size: 10px; color: var(--text-secondary);">ACTIVE ADAPTIVE MODEL</div>
+                    <div class="name" id="file-model-name">Proposed CCAF-DB</div>
+                </div>
+                <div class="tag" id="file-model-tag">PROPOSED</div>
+            </div>
+
+            <!-- Quick Preset Samples for instant testing -->
+            <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 5px;">⚡ Quick Load Sample Audio:</div>
+            <div class="preset-row">
+                <button class="preset-btn" id="presetAec">Speech + Room Echo (AEC)</button>
+                <button class="preset-btn" id="presetSynthetic">Synthetic Tone + Noise</button>
+                <button class="preset-btn" id="presetBurst">Impulsive Outlier Burst</button>
+            </div>
+
+            <!-- Universal File Input: Accepts WAV, MP3, OGG, AAC, FLAC, M4A, WEBM -->
+            <input type="file" id="fileAudioInput" accept="audio/*,.wav,.mp3,.ogg,.m4a,.aac,.flac,.webm" style="display: none;">
+            <button id="btnTriggerFilePicker" class="btn btn-primary">
+                📁 SELECT AUDIO FILE (WAV, MP3, AAC, OGG, FLAC)
+            </button>
+
+            <p id="selectedFileName" style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 10px; text-align: center;">
+                No file chosen. Supported: .wav, .mp3, .ogg, .flac, .m4a
+            </p>
+
+            <div class="canvas-card">
+                <canvas id="fileCanvas"></canvas>
+                <div class="canvas-legend">
+                    <div class="legend-item"><div class="dot-cyan"></div> Real Audio (Original)</div>
+                    <div class="legend-item"><div class="dot-amber"></div> After Model (Filtered)</div>
+                </div>
+            </div>
+
+            <div class="metrics-hud">
+                <span>Coverage <strong id="file-cov">--</strong></span>
+                <span>Winkler <strong id="file-wink">--</strong></span>
+                <span>Speedup <strong id="file-speed">1.9x</strong></span>
+            </div>
+
+            <!-- ================= INSTANT SHIFTING SWITCHER ================= -->
+            <div class="instant-shift-card">
+                <div class="shift-header">
+                    <span class="shift-title">⚡ Instant A/B Audio Switcher</span>
+                    <span class="live-tag">ZERO LATENCY SHIFT</span>
+                </div>
+                <p style="font-size: 10.5px; color: #94a3b8; margin-bottom: 8px;">
+                    Switch between Original and Model in real time without restarting playback:
+                </p>
+                <div class="toggle-switch-container">
+                    <div id="shiftToggleOriginal" class="toggle-opt active-orig">
+                        🔈 Original File
+                    </div>
+                    <div id="shiftToggleModel" class="toggle-opt">
+                        🎧 Model Output
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playback Control Bar -->
+            <div class="btn-row">
+                <button id="btnPlaySeamless" class="btn btn-primary" disabled>
+                    ▶️ Play Audio with Live Shifting
+                </button>
+                <button id="btnStopPlayback" class="btn btn-secondary" style="max-width: 90px;" disabled>
+                    ⏹️ Stop
+                </button>
+            </div>
+
+            <!-- Multi-Format Save to Memory -->
+            <div class="card" style="margin-top: 6px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">💾 Export Filtered Audio to Storage:</div>
+                <div class="export-row">
+                    <select id="fileFormatSelect" class="format-select">
+                        <option value="wav">WAV (Lossless 16-bit PCM)</option>
+                        <option value="mp3">MP3 (Compressed 128 kbps)</option>
+                    </select>
+                    <button id="btnSaveNewFile" class="btn btn-success" style="flex: 1; margin-bottom: 0;" disabled>
+                        SAVE NEW FILE TO MEMORY
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= OPTION 3: CHOOSE MODEL ================= -->
+        <div id="screen-choose-model" class="screen">
+            <div class="sub-tab-group">
+                <div id="subtab-select" class="sub-tab active">2. Select Model</div>
+                <div id="subtab-add" class="sub-tab">1. Add New Model</div>
+            </div>
+
+            <!-- Sub-interface 2: Select Model -->
+            <div id="subpanel-select">
+                <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">
+                    Select an algorithm from the research suite:
+                </p>
+                <div id="modelListContainer">
+                    <!-- Populated via JavaScript with all 7 models -->
+                </div>
+            </div>
+
+            <!-- Sub-interface 1: Add New Model -->
+            <div id="subpanel-add" style="display: none;">
+                <div class="card">
+                    <h3>Import From Storage</h3>
+                    <p>Load custom model configuration JSON file:</p>
+                    <input type="file" id="jsonModelInput" accept=".json" style="display: none;">
+                    <button id="btnTriggerJsonPicker" class="btn btn-primary">
+                        📄 IMPORT MODEL FROM FILE (.json)
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Manual Configuration</h3>
+                    <p>Define custom adaptive filter parameters:</p>
+                    <input type="text" id="customName" placeholder="Model Name (e.g. CCAF Aggressive)">
+                    <div class="input-row">
+                        <input type="number" id="customTaps" placeholder="Taps" value="64">
+                        <input type="number" id="customMuMin" placeholder="Mu Min" step="0.01" value="0.05">
+                    </div>
+                    <div class="input-row">
+                        <input type="number" id="customMuMax" placeholder="Mu Max" step="0.05" value="0.50">
+                        <input type="number" id="customGamma" placeholder="Gamma" step="0.001" value="0.005">
+                    </div>
+                    <div class="input-row">
+                        <input type="number" id="customAlpha" placeholder="Alpha" step="0.01" value="0.10">
+                        <input type="number" id="customTau" placeholder="Tau" step="0.01" value="0.04">
+                    </div>
+                    <button id="btnCreateCustom" class="btn btn-success" style="margin-top: 6px;">
+                        CREATE & ACTIVATE MODEL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Android Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div id="nav-btn-1" class="nav-item active">
+            <div class="nav-icon">🎙️</div>
+            <div>Live Record</div>
+        </div>
+        <div id="nav-btn-2" class="nav-item">
+            <div class="nav-icon">📁</div>
+            <div>Select File</div>
+        </div>
+        <div id="nav-btn-3" class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div>Choose Model</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Model Suite Definition ---
+    let models = [
+        {
+            id: 'ccaf_db',
+            name: 'Proposed CCAF-DB',
+            category: 'PROPOSED METHOD',
+            isProposed: true,
+            desc: 'Conformal-Controlled Adaptive Filter with Dead-Band step-size control. Eliminates misadjustment penalty while achieving distribution-free coverage.',
+            taps: 64, muMin: 0.05, muMax: 0.50, gamma: 0.005, alpha: 0.10, tau: 0.04
+        },
+        {
+            id: 'decoupled_aci',
+            name: 'Decoupled ACI',
+            category: 'ABLATION BASELINE',
+            isProposed: false,
+            desc: 'Fixed-step NLMS (mu=0.05) with decoupled Adaptive Conformal Inference (open-loop uncertainty quantification without feedback).',
+            taps: 64, muMin: 0.05, muMax: 0.05, gamma: 0.005, alpha: 0.10
+        },
+        {
+            id: 'nlms_fast',
+            name: 'NLMS (fast)',
+            category: 'CLASSICAL BASELINE',
+            isProposed: false,
+            desc: 'Normalized LMS with high learning rate (mu=0.50) for fast tracking at the cost of high steady-state excess MSE.',
+            taps: 64, muMin: 0.50, muMax: 0.50
+        },
+        {
+            id: 'nlms_slow',
+            name: 'NLMS (slow)',
+            category: 'CLASSICAL BASELINE',
+            isProposed: false,
+            desc: 'Normalized LMS with conservative learning rate (mu=0.05) for low steady-state misadjustment but sluggish recovery.',
+            taps: 64, muMin: 0.05, muMax: 0.05
+        },
+        {
+            id: 'kwong_vss',
+            name: 'Kwong VSS-LMS',
+            category: 'STATE-OF-THE-ART VSS',
+            isProposed: false,
+            desc: 'Variable step-size LMS governed by squared instantaneous error power (Kwong & Johnston, 1992).',
+            taps: 64, muMin: 0.01, muMax: 0.50, alphaK: 0.97, gammaK: 0.005
+        },
+        {
+            id: 'benesty_vss',
+            name: 'Benesty NP-VSS',
+            category: 'STATE-OF-THE-ART VSS',
+            isProposed: false,
+            desc: 'Nonparametric variable step-size NLMS based on system distance and noise variance estimation (Benesty et al., 2006).',
+            taps: 64, muMin: 0.0, muMax: 1.0, alphaScale: 0.99
+        },
+        {
+            id: 'convex_comb',
+            name: 'Convex Combination',
+            category: 'COMBINATION FILTER',
+            isProposed: false,
+            desc: 'Sigmoidal convex combination of fast (mu=0.5) and slow (mu=0.05) NLMS filters (Arenas-Garcia et al., 2006).',
+            taps: 64, muFast: 0.50, muSlow: 0.05, muA: 0.50
+        }
+    ];
+
+    let currentModel = models[0];
+
+    // Navigation Logic
+    const screens = {
+        1: document.getElementById('screen-live-record'),
+        2: document.getElementById('screen-select-file'),
+        3: document.getElementById('screen-choose-model')
+    };
+    const navButtons = {
+        1: document.getElementById('nav-btn-1'),
+        2: document.getElementById('nav-btn-2'),
+        3: document.getElementById('nav-btn-3')
+    };
+
+    function switchScreen(idx) {
+        for (let k in screens) {
+            screens[k].classList.remove('active');
+            navButtons[k].classList.remove('active');
+        }
+        screens[idx].classList.add('active');
+        navButtons[idx].classList.add('active');
+    }
+
+    navButtons[1].onclick = () => switchScreen(1);
+    navButtons[2].onclick = () => switchScreen(2);
+    navButtons[3].onclick = () => switchScreen(3);
+
+    // Subtabs inside Choose Model
+    const subtabSelect = document.getElementById('subtab-select');
+    const subtabAdd = document.getElementById('subtab-add');
+    const subpanelSelect = document.getElementById('subpanel-select');
+    const subpanelAdd = document.getElementById('subpanel-add');
+
+    subtabSelect.onclick = () => {
+        subtabSelect.classList.add('active');
+        subtabAdd.classList.remove('active');
+        subpanelSelect.style.display = 'block';
+        subpanelAdd.style.display = 'none';
+    };
+
+    subtabAdd.onclick = () => {
+        subtabAdd.classList.add('active');
+        subtabSelect.classList.remove('active');
+        subpanelSelect.style.display = 'none';
+        subpanelAdd.style.display = 'block';
+    };
+
+    // Render Model Cards
+    function renderModelList() {
+        const container = document.getElementById('modelListContainer');
+        container.innerHTML = '';
+        models.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'card' + (m.isProposed ? ' proposed' : '') + (m.id === currentModel.id ? ' active-selected' : '');
+            card.innerHTML = `
+                <h3>
+                    <span>${m.name}</span>
+                    <span class="badge">${m.category}</span>
+                </h3>
+                <p>${m.desc}</p>
+                <button class="btn btn-secondary" style="padding: 7px; margin-bottom: 0;">
+                    ${m.id === currentModel.id ? '✓ ACTIVE' : 'SELECT MODEL'}
+                </button>
+            `;
+            card.onclick = () => selectModel(m);
+            container.appendChild(card);
+        });
+
+        document.getElementById('live-model-name').textContent = currentModel.name;
+        document.getElementById('live-model-tag').textContent = currentModel.isProposed ? 'PROPOSED' : 'BASELINE';
+        document.getElementById('file-model-name').textContent = currentModel.name;
+        document.getElementById('file-model-tag').textContent = currentModel.isProposed ? 'PROPOSED' : 'BASELINE';
+    }
+
+    function selectModel(m) {
+        currentModel = m;
+        renderModelList();
+        // If file is loaded, re-process with new model
+        if (fileRawAudio.length > 0) {
+            processLoadedFileAudio();
+        }
+    }
+
+    renderModelList();
+
+    // Import Model JSON
+    document.getElementById('btnTriggerJsonPicker').onclick = () => {
+        document.getElementById('jsonModelInput').click();
+    };
+
+    document.getElementById('jsonModelInput').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const parsed = JSON.parse(event.target.result);
+                const newModel = {
+                    id: 'custom_' + Date.now(),
+                    name: parsed.name || 'Imported Custom Model',
+                    category: parsed.category || 'USER IMPORTED',
+                    isProposed: false,
+                    desc: parsed.description || 'Imported JSON configuration',
+                    ...parsed.parameters
+                };
+                models.push(newModel);
+                selectModel(newModel);
+                subtabSelect.click();
+                alert('Imported and activated: ' + newModel.name);
+            } catch (err) {
+                alert('Invalid JSON file: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    // Manual Custom Model
+    document.getElementById('btnCreateCustom').onclick = () => {
+        const name = document.getElementById('customName').value.trim() || 'Custom Adaptive Filter';
+        const newModel = {
+            id: 'custom_' + Date.now(),
+            name: name,
+            category: 'USER CONFIGURED',
+            isProposed: false,
+            desc: 'Custom parameter adaptive filter.',
+            taps: parseInt(document.getElementById('customTaps').value) || 64,
+            muMin: parseFloat(document.getElementById('customMuMin').value) || 0.05,
+            muMax: parseFloat(document.getElementById('customMuMax').value) || 0.50,
+            gamma: parseFloat(document.getElementById('customGamma').value) || 0.005,
+            alpha: parseFloat(document.getElementById('customAlpha').value) || 0.10,
+            tau: parseFloat(document.getElementById('customTau').value) || 0.04
+        };
+        models.push(newModel);
+        selectModel(newModel);
+        subtabSelect.click();
+        alert('Created and activated: ' + newModel.name);
+    };
+
+    // =========================================================================
+    // DSP Implementation: Adaptive Filters + Conformal Prediction
+    // =========================================================================
+    class AdaptiveFilterDSP {
+        constructor(model) {
+            this.model = model;
+            this.taps = model.taps || 64;
+            this.w = new Float64Array(this.taps);
+            this.x = new Float64Array(this.taps);
+            this.mu = model.muMin || 0.05;
+            this.q = 1.645;
+            this.errRate = model.alpha || 0.10;
+            this.s2 = 1e-4;
+            this.hits = 0;
+            this.total = 0;
+            this.winklerAcc = 0;
+
+            // Benesty state
+            this.sigE2 = 1.0;
+            this.sigV2 = 0.01;
+
+            // Convex comb state
+            this.wFast = new Float64Array(this.taps);
+            this.wSlow = new Float64Array(this.taps);
+            this.lambdaParam = 0.0;
+        }
+
+        process(sample) {
+            // Regressor shift
+            for (let i = this.taps - 1; i > 0; i--) {
+                this.x[i] = this.x[i - 1];
+            }
+            this.x[0] = sample;
+
+            // Desired target & point prediction
+            let d = sample;
+            let yHat = 0.0;
+            for (let i = 0; i < this.taps; i++) {
+                yHat += this.w[i] * this.x[i];
+            }
+            let e = d - yHat;
+
+            // Running scale update s^2(n)
+            this.s2 = 0.95 * this.s2 + 0.05 * (e * e);
+            let s = Math.sqrt(Math.max(1e-6, this.s2));
+
+            // Conformal prediction bounds
+            let halfWidth = this.q * s;
+            let inInterval = (Math.abs(e) <= halfWidth);
+            if (inInterval) this.hits++;
+            this.total++;
+
+            // Winkler score penalty
+            let winkler = 2 * halfWidth;
+            if (!inInterval) {
+                let dist = Math.abs(e) - halfWidth;
+                winkler += (2.0 / (this.model.alpha || 0.10)) * dist;
+            }
+            this.winklerAcc += winkler;
+
+            // ACI quantile update
+            let miss = inInterval ? 0.0 : 1.0;
+            let targetAlpha = this.model.alpha || 0.10;
+            let gamma = this.model.gamma || 0.005;
+            this.errRate = Math.max(0.01, Math.min(0.99, this.errRate + gamma * (targetAlpha - miss)));
+            this.q = Math.max(0.5, Math.min(4.0, 1.645 * (1.0 - this.errRate) / 0.90));
+
+            // Weight updates based on model algorithm
+            let normSq = 1e-4;
+            for (let i = 0; i < this.taps; i++) normSq += this.x[i] * this.x[i];
+
+            if (this.model.id === 'ccaf_db') {
+                let tau = this.model.tau || 0.04;
+                let deficit = Math.max(0.0, (targetAlpha - this.errRate) - tau);
+                this.mu = this.model.muMin + (this.model.muMax - this.model.muMin) * Math.min(1.0, deficit / targetAlpha);
+                let factor = this.mu * e / normSq;
+                for (let i = 0; i < this.taps; i++) this.w[i] += factor * this.x[i];
+            } else if (this.model.id === 'kwong_vss') {
+                let eSq = Math.min(100.0, e * e);
+                this.mu = Math.max(this.model.muMin, Math.min(this.model.muMax, 0.97 * this.mu + 0.005 * eSq));
+                let factor = this.mu * e / normSq;
+                for (let i = 0; i < this.taps; i++) this.w[i] += factor * this.x[i];
+            } else if (this.model.id === 'benesty_vss') {
+                this.sigE2 = 0.99 * this.sigE2 + 0.01 * (e * e);
+                if (this.sigE2 < this.sigV2) this.sigV2 = this.sigE2;
+                else this.sigV2 = 0.999 * this.sigV2 + 0.001 * this.sigE2;
+                let ratio = Math.sqrt(Math.max(0.0, this.sigV2) / (this.sigE2 + 1e-6));
+                this.mu = Math.max(0.0, Math.min(1.0, Math.abs(1.0 - ratio)));
+                let factor = this.mu * e / normSq;
+                for (let i = 0; i < this.taps; i++) this.w[i] += factor * this.x[i];
+            } else {
+                let factor = this.mu * e / normSq;
+                for (let i = 0; i < this.taps; i++) this.w[i] += factor * this.x[i];
+            }
+
+            return {
+                filt: e,
+                step: this.mu,
+                cov: (100 * this.hits / this.total),
+                wink: (this.winklerAcc / this.total)
+            };
+        }
+    }
+
+    // Waveform Renderer
+    function renderWaveform(canvas, origData, filtData) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.fillStyle = '#090e17';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+        ctx.moveTo(0, h / 4); ctx.lineTo(w, h / 4);
+        ctx.moveTo(0, 3 * h / 4); ctx.lineTo(w, 3 * h / 4);
+        ctx.stroke();
+
+        const len = origData.length;
+        if (len < 2) return;
+        const step = w / (len - 1);
+
+        // Cyan: Original
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < len; i++) {
+            let x = i * step;
+            let y = (h / 2) - (origData[i] * h * 0.44);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Amber: After Model
+        ctx.strokeStyle = '#ffd600';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < len; i++) {
+            let x = i * step;
+            let y = (h / 2) - (filtData[i] * h * 0.44);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    // =========================================================================
+    // SEAMLESS INSTANT AUDIO SHIFTER (Web Audio API Dual Gain Nodes)
+    // =========================================================================
+    let audioCtx = null;
+    function getAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    class DualTrackShifter {
+        constructor() {
+            this.isPlaying = false;
+            this.srcNode = null;
+            this.gainOrig = null;
+            this.gainModel = null;
+            this.activeTrack = 'original'; // 'original' or 'model'
+            this.onStopCallback = null;
+        }
+
+        playDual(origSamples, modelSamples, sampleRate, onStop) {
+            this.stop();
+            const ctx = getAudioContext();
+            this.onStopCallback = onStop;
+
+            // Create stereo or dual-channel audio buffer
+            const len = Math.min(origSamples.length, modelSamples.length);
+            const buffer = ctx.createBuffer(2, len, sampleRate || 44100);
+            buffer.getChannelData(0).set(origSamples.subarray(0, len));  // Channel 0 = Original
+            buffer.getChannelData(1).set(modelSamples.subarray(0, len)); // Channel 1 = Model
+
+            // Splitter
+            this.srcNode = ctx.createBufferSource();
+            this.srcNode.buffer = buffer;
+
+            const splitter = ctx.createChannelSplitter(2);
+            this.gainOrig = ctx.createGain();
+            this.gainModel = ctx.createGain();
+            const merger = ctx.createChannelMerger(2);
+
+            this.srcNode.connect(splitter);
+
+            // Channel 0 -> gainOrig -> left & right
+            splitter.connect(this.gainOrig, 0);
+            this.gainOrig.connect(ctx.destination);
+
+            // Channel 1 -> gainModel -> left & right
+            splitter.connect(this.gainModel, 1);
+            this.gainModel.connect(ctx.destination);
+
+            // Apply active track gain immediately
+            this.applyGainState(0);
+
+            this.srcNode.onended = () => {
+                this.isPlaying = false;
+                if (this.onStopCallback) this.onStopCallback();
+            };
+
+            this.srcNode.start();
+            this.isPlaying = true;
+        }
+
+        shiftTo(trackName) {
+            this.activeTrack = trackName;
+            this.applyGainState(0.015); // 15ms fast cross-fade for zero click/pop instant shift
+        }
+
+        applyGainState(fadeTime) {
+            if (!this.gainOrig || !this.gainModel) return;
+            const ctx = getAudioContext();
+            const t = ctx.currentTime;
+            const targetOrig = (this.activeTrack === 'original') ? 1.0 : 0.0;
+            const targetModel = (this.activeTrack === 'model') ? 1.0 : 0.0;
+
+            if (fadeTime > 0) {
+                this.gainOrig.gain.cancelScheduledValues(t);
+                this.gainModel.gain.cancelScheduledValues(t);
+                this.gainOrig.gain.setTargetAtTime(targetOrig, t, fadeTime);
+                this.gainModel.gain.setTargetAtTime(targetModel, t, fadeTime);
+            } else {
+                this.gainOrig.gain.setValueAtTime(targetOrig, t);
+                this.gainModel.gain.setValueAtTime(targetModel, t);
+            }
+        }
+
+        stop() {
+            if (this.srcNode) {
+                try {
+                    this.srcNode.stop();
+                    this.srcNode.disconnect();
+                } catch(e) {}
+                this.srcNode = null;
+            }
+            this.isPlaying = false;
+        }
+    }
+
+    const fileShifter = new DualTrackShifter();
+    const liveShifter = new DualTrackShifter();
+
+    // =========================================================================
+    // Option 1: Live Record Logic
+    // =========================================================================
+    const liveCanvas = document.getElementById('liveCanvas');
+    liveCanvas.width = liveCanvas.clientWidth * window.devicePixelRatio || 380;
+    liveCanvas.height = 165 * window.devicePixelRatio || 165;
+
+    let micStream = null;
+    let scriptProcessor = null;
+    let isRecording = false;
+    let liveFilterDSP = null;
+    let recordedRaw = [];
+    let recordedFilt = [];
+    let rollingOrig = new Float32Array(160);
+    let rollingFilt = new Float32Array(160);
+
+    const btnRecordToggle = document.getElementById('btnRecordToggle');
+    const liveStatusText = document.getElementById('liveStatusText');
+    const btnLivePlayToggle = document.getElementById('btnLivePlayToggle');
+    const btnSaveRecord = document.getElementById('btnSaveRecord');
+    const liveToggleOrig = document.getElementById('liveToggleOrig');
+    const liveToggleModel = document.getElementById('liveToggleModel');
+
+    btnRecordToggle.onclick = async () => {
+        const ctx = getAudioContext();
+        if (!isRecording) {
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const source = ctx.createMediaStreamSource(micStream);
+                scriptProcessor = ctx.createScriptProcessor(512, 1, 1);
+
+                liveFilterDSP = new AdaptiveFilterDSP(currentModel);
+                recordedRaw = [];
+                recordedFilt = [];
+
+                scriptProcessor.onaudioprocess = (e) => {
+                    const input = e.inputBuffer.getChannelData(0);
+                    let lastOut = null;
+                    for (let i = 0; i < input.length; i++) {
+                        let sample = input[i];
+                        lastOut = liveFilterDSP.process(sample);
+                        recordedRaw.push(sample);
+                        recordedFilt.push(lastOut.filt);
+
+                        for (let j = 0; j < rollingOrig.length - 1; j++) {
+                            rollingOrig[j] = rollingOrig[j + 1];
+                            rollingFilt[j] = rollingFilt[j + 1];
+                        }
+                        rollingOrig[rollingOrig.length - 1] = sample;
+                        rollingFilt[rollingFilt.length - 1] = lastOut.filt;
+                    }
+
+                    renderWaveform(liveCanvas, rollingOrig, rollingFilt);
+                    if (lastOut) {
+                        document.getElementById('live-step').textContent = lastOut.step.toFixed(4);
+                        document.getElementById('live-cov').textContent = lastOut.cov.toFixed(1) + '%';
+                        document.getElementById('live-wink').textContent = lastOut.wink.toFixed(3);
+                    }
+                };
+
+                source.connect(scriptProcessor);
+                scriptProcessor.connect(ctx.destination);
+
+                isRecording = true;
+                btnRecordToggle.textContent = '⏹️ STOP RECORDING';
+                btnRecordToggle.classList.add('btn-record-active');
+                liveStatusText.textContent = 'Recording live microphone... Adaptive filter actively tracking.';
+                btnLivePlayToggle.disabled = true;
+                btnSaveRecord.disabled = true;
+            } catch (err) {
+                alert('Microphone error: ' + err.message);
+            }
+        } else {
+            isRecording = false;
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+            if (scriptProcessor) scriptProcessor.disconnect();
+
+            btnRecordToggle.textContent = '🎙️ START LIVE RECORDING';
+            btnRecordToggle.classList.remove('btn-record-active');
+            liveStatusText.textContent = `Captured ${(recordedRaw.length / 16000).toFixed(1)}s. Use Instant Switcher below to test A/B shifting!`;
+
+            btnLivePlayToggle.disabled = false;
+            btnSaveRecord.disabled = false;
+        }
+    };
+
+    // Live Instant Shifter Controls
+    liveToggleOrig.onclick = () => {
+        liveToggleOrig.classList.add('active-orig');
+        liveToggleModel.classList.remove('active-model');
+        liveShifter.shiftTo('original');
+    };
+
+    liveToggleModel.onclick = () => {
+        liveToggleModel.classList.add('active-model');
+        liveToggleOrig.classList.remove('active-orig');
+        liveShifter.shiftTo('model');
+    };
+
+    btnLivePlayToggle.onclick = () => {
+        if (!liveShifter.isPlaying) {
+            liveShifter.playDual(
+                new Float32Array(recordedRaw),
+                new Float32Array(recordedFilt),
+                44100,
+                () => { btnLivePlayToggle.textContent = '▶️ Play Recording'; }
+            );
+            btnLivePlayToggle.textContent = '⏹️ Stop Playback';
+        } else {
+            liveShifter.stop();
+            btnLivePlayToggle.textContent = '▶️ Play Recording';
+        }
+    };
+
+    btnSaveRecord.onclick = () => {
+        const fmt = document.getElementById('liveFormatSelect').value;
+        exportAudio(new Float32Array(recordedFilt), 44100, fmt, 'LiveRecord_CCAF_Filtered');
+    };
+
+    // =========================================================================
+    // Option 2: Select File Engine with Instant Shifting
+    // =========================================================================
+    const fileCanvas = document.getElementById('fileCanvas');
+    fileCanvas.width = fileCanvas.clientWidth * window.devicePixelRatio || 380;
+    fileCanvas.height = 165 * window.devicePixelRatio || 165;
+
+    let fileRawAudio = [];
+    let fileFiltAudio = [];
+    let fileSampleRate = 44100;
+
+    document.getElementById('btnTriggerFilePicker').onclick = () => {
+        document.getElementById('fileAudioInput').click();
+    };
+
+    // Preset Audio Buttons
+    document.getElementById('presetAec').onclick = () => loadPresetFile('microsoft_aec_sample.wav', 'Microsoft AEC Room Echo Sample');
+    document.getElementById('presetSynthetic').onclick = () => loadSyntheticAudio('tone_noise', 'Synthetic Tone + Additive Noise');
+    document.getElementById('presetBurst').onclick = () => loadSyntheticAudio('burst', 'Synthetic Speech + Impulsive Outlier Burst');
+
+    async function loadPresetFile(url, displayName) {
+        document.getElementById('selectedFileName').textContent = `Loading preset: ${displayName}...`;
+        try {
+            const resp = await fetch(url);
+            const arrayBuf = await resp.arrayBuffer();
+            decodeAndProcessAudio(arrayBuf, displayName);
+        } catch(e) {
+            alert('Failed to load preset: ' + e.message);
+        }
+    }
+
+    function loadSyntheticAudio(type, displayName) {
+        const sr = 16000;
+        const duration = 6.0;
+        const total = Math.floor(sr * duration);
+        const raw = new Float32Array(total);
+
+        for (let i = 0; i < total; i++) {
+            let t = i / sr;
+            // Desired speech proxy
+            let s = 0.4 * Math.sin(2 * Math.PI * 220 * t) + 0.25 * Math.sin(2 * Math.PI * 440 * t);
+            // Interference
+            let n = 0.25 * (Math.random() * 2 - 1);
+            if (type === 'burst' && i > total * 0.45 && i < total * 0.55) {
+                // Impulsive outlier burst
+                n += 1.2 * (Math.random() * 2 - 1);
+            }
+            raw[i] = Math.max(-1, Math.min(1, s + n));
+        }
+
+        const ctx = getAudioContext();
+        fileRawAudio = Array.from(raw);
+        fileSampleRate = sr;
+        document.getElementById('selectedFileName').textContent = `Generated: ${displayName} (${duration}s, ${sr}Hz)`;
+        processLoadedFileAudio();
+    }
+
+    // Universal File Loader (Decodes WAV, MP3, AAC, FLAC, OGG, WEBM)
+    document.getElementById('fileAudioInput').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        document.getElementById('selectedFileName').textContent = `Decoding audio: ${file.name}...`;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            decodeAndProcessAudio(event.target.result, file.name);
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    async function decodeAndProcessAudio(arrayBuffer, filename) {
+        const ctx = getAudioContext();
+        try {
+            const decoded = await ctx.decodeAudioData(arrayBuffer);
+            fileRawAudio = Array.from(decoded.getChannelData(0));
+            fileSampleRate = decoded.sampleRate;
+
+            document.getElementById('selectedFileName').textContent =
+                `Loaded: ${filename} (${decoded.duration.toFixed(1)}s, ${fileSampleRate}Hz)`;
+
+            processLoadedFileAudio();
+        } catch (err) {
+            alert('Audio decode error: ' + err.message);
+        }
+    }
+
+    function processLoadedFileAudio() {
+        if (!fileRawAudio || fileRawAudio.length === 0) return;
+
+        const dsp = new AdaptiveFilterDSP(currentModel);
+        fileFiltAudio = new Array(fileRawAudio.length);
+        let downsampleRate = Math.max(1, Math.floor(fileRawAudio.length / 220));
+        let displayOrig = [];
+        let displayFilt = [];
+
+        for (let i = 0; i < fileRawAudio.length; i++) {
+            let out = dsp.process(fileRawAudio[i]);
+            fileFiltAudio[i] = out.filt;
+            if (i % downsampleRate === 0) {
+                displayOrig.push(fileRawAudio[i]);
+                displayFilt.push(out.filt);
+            }
+        }
+
+        renderWaveform(fileCanvas, displayOrig, displayFilt);
+        document.getElementById('file-cov').textContent = (100 * dsp.hits / dsp.total).toFixed(1) + '%';
+        document.getElementById('file-wink').textContent = (dsp.winklerAcc / dsp.total).toFixed(3);
+
+        document.getElementById('btnPlaySeamless').disabled = false;
+        document.getElementById('btnStopPlayback').disabled = false;
+        document.getElementById('btnSaveNewFile').disabled = false;
+    }
+
+    // Instant Shifting Switches for File
+    const shiftToggleOrig = document.getElementById('shiftToggleOriginal');
+    const shiftToggleModel = document.getElementById('shiftToggleModel');
+
+    shiftToggleOrig.onclick = () => {
+        shiftToggleOrig.classList.add('active-orig');
+        shiftToggleModel.classList.remove('active-model');
+        fileShifter.shiftTo('original');
+    };
+
+    shiftToggleModel.onclick = () => {
+        shiftToggleModel.classList.add('active-model');
+        shiftToggleOrig.classList.remove('active-orig');
+        fileShifter.shiftTo('model');
+    };
+
+    // Playback Button
+    document.getElementById('btnPlaySeamless').onclick = () => {
+        if (!fileShifter.isPlaying) {
+            fileShifter.playDual(
+                new Float32Array(fileRawAudio),
+                new Float32Array(fileFiltAudio),
+                fileSampleRate,
+                () => { document.getElementById('btnPlaySeamless').textContent = '▶️ Play Audio with Live Shifting'; }
+            );
+            document.getElementById('btnPlaySeamless').textContent = '⏸️ Playing (Click Shifter to Switch)';
+        } else {
+            fileShifter.stop();
+            document.getElementById('btnPlaySeamless').textContent = '▶️ Play Audio with Live Shifting';
+        }
+    };
+
+    document.getElementById('btnStopPlayback').onclick = () => {
+        fileShifter.stop();
+        document.getElementById('btnPlaySeamless').textContent = '▶️ Play Audio with Live Shifting';
+    };
+
+    document.getElementById('btnSaveNewFile').onclick = () => {
+        const fmt = document.getElementById('fileFormatSelect').value;
+        exportAudio(new Float32Array(fileFiltAudio), fileSampleRate, fmt, 'Filtered_By_' + currentModel.name.replace(/\s+/g, '_'));
+    };
+
+    // =========================================================================
+    // MULTI-FORMAT AUDIO EXPORTER (WAV & MP3)
+    // =========================================================================
+    function exportAudio(samples, sampleRate, format, baseFilename) {
+        if (format === 'mp3' && typeof lamejs !== 'undefined') {
+            // Encode to MP3 using client-side LAME encoder
+            try {
+                const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128); // 1 channel, 128 kbps
+                const mp3Data = [];
+                const sampleBlockSize = 1152;
+                const sampleShorts = new Int16Array(samples.length);
+
+                for (let i = 0; i < samples.length; i++) {
+                    let s = Math.max(-1, Math.min(1, samples[i]));
+                    sampleShorts[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                }
+
+                for (let i = 0; i < sampleShorts.length; i += sampleBlockSize) {
+                    const chunk = sampleShorts.subarray(i, i + sampleBlockSize);
+                    const mp3buf = mp3encoder.encodeBuffer(chunk);
+                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                }
+                const endBuf = mp3encoder.flush();
+                if (endBuf.length > 0) mp3Data.push(endBuf);
+
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                downloadBlob(blob, baseFilename + '.mp3');
+                return;
+            } catch(e) {
+                console.warn('Lamejs encoding fallback to WAV:', e);
+            }
+        }
+
+        // Default: 16-bit PCM WAV
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+
+        function writeString(offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + samples.length * 2, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, 1, true); // mono
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, samples.length * 2, true);
+
+        let offset = 44;
+        for (let i = 0; i < samples.length; i++, offset += 2) {
+            let s = Math.max(-1, Math.min(1, samples[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+
+        const blob = new Blob([buffer], { type: 'audio/wav' });
+        downloadBlob(blob, baseFilename + '.wav');
+    }
+
+    function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>

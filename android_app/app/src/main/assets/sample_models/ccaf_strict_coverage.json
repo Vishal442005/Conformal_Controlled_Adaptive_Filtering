@@ -1,0 +1,14 @@
+{
+  "name": "CCAF Strict Coverage 95%",
+  "category": "CONFORMAL VSS",
+  "description": "Ultra-reliable clinical calibration targeting 95% marginal coverage (alpha=0.05).",
+  "parameters": {
+    "taps": 64.0,
+    "muMin": 0.02,
+    "muMax": 0.40,
+    "gamma": 0.002,
+    "alpha": 0.05,
+    "tau": 0.02,
+    "kappa": 6.0
+  }
+}

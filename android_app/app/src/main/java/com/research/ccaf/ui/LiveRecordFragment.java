@@ -24,6 +24,7 @@ import com.research.ccaf.dsp.AdaptiveFilter;
 import com.research.ccaf.dsp.AudioRecordPlayerEngine;
 import com.research.ccaf.dsp.ModelInfo;
 import com.research.ccaf.dsp.ModelManager;
+import com.research.ccaf.dsp.UniversalAudioHelper;
 import com.research.ccaf.dsp.WavFileHelper;
 
 import java.io.File;
@@ -34,7 +35,8 @@ import java.util.Locale;
 /**
  * Option 1: Live Record Screen.
  * Records live audio from microphone, runs real-time filtering with active model,
- * renders live 2-line dual waveform, and provides post-recording playback and save options.
+ * renders live 2-line dual waveform, provides instant zero-latency A/B shifting
+ * during post-recording playback, and saves multi-format audio to storage.
  */
 public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEngine.AudioFrameListener {
 
@@ -44,16 +46,20 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
     private Button btnRecordToggle;
     private Button btnListenReal;
     private Button btnListenModel;
+    private Button btnPlaySeamlessLive;
     private Button btnSave;
     private TextView tvActiveModelTag;
     private TextView tvMetrics;
     private TextView tvStatus;
 
     private AudioRecordPlayerEngine audioEngine;
+    private final UniversalAudioHelper.SeamlessShifterEngine shifterEngine = new UniversalAudioHelper.SeamlessShifterEngine();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private double[] lastRecordedRaw;
     private double[] lastRecordedFiltered;
+    private double runningPowerRaw = 1e-6;
+    private double runningPowerFilt = 1e-6;
 
     @Nullable
     @Override
@@ -64,6 +70,7 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
         btnRecordToggle = view.findViewById(R.id.btnRecordToggle);
         btnListenReal = view.findViewById(R.id.btnListenReal);
         btnListenModel = view.findViewById(R.id.btnListenModel);
+        btnPlaySeamlessLive = view.findViewById(R.id.btnPlaySeamlessLive);
         btnSave = view.findViewById(R.id.btnSave);
         tvActiveModelTag = view.findViewById(R.id.tvActiveModelTag);
         tvMetrics = view.findViewById(R.id.tvMetrics);
@@ -100,35 +107,44 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
             }
         });
 
+        // Instant A/B Shift: Switch to Original
         btnListenReal.setOnClickListener(v -> {
-            if (lastRecordedRaw == null || lastRecordedRaw.length == 0) {
-                Toast.makeText(getContext(), "No recorded audio available", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            tvStatus.setText("Playing: Real Raw Audio (Microphone)...");
-            btnListenReal.setEnabled(false);
-            btnListenModel.setEnabled(false);
-            audioEngine.playAudio(lastRecordedRaw, () -> mainHandler.post(() -> {
-                tvStatus.setText("Playback complete.");
-                btnListenReal.setEnabled(true);
-                btnListenModel.setEnabled(true);
-            }));
+            shifterEngine.shiftToOriginal();
+            btnListenReal.setBackgroundColor(0xFF0F766E); // Teal active
+            btnListenReal.setTextColor(0xFFFFFFFF);
+            btnListenModel.setBackgroundColor(0xFF334155); // Gray inactive
+            btnListenModel.setTextColor(0xFFCBD5E1);
+            tvStatus.setText("🎧 Live Track: 🔈 ORIGINAL MICROPHONE");
         });
 
+        // Instant A/B Shift: Switch to Model Filtered
         btnListenModel.setOnClickListener(v -> {
-            if (lastRecordedFiltered == null || lastRecordedFiltered.length == 0) {
-                Toast.makeText(getContext(), "No filtered audio available", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            tvStatus.setText("Playing: Changed Audio (After Model)...");
-            btnListenReal.setEnabled(false);
-            btnListenModel.setEnabled(false);
-            audioEngine.playAudio(lastRecordedFiltered, () -> mainHandler.post(() -> {
-                tvStatus.setText("Playback complete.");
-                btnListenReal.setEnabled(true);
-                btnListenModel.setEnabled(true);
-            }));
+            shifterEngine.shiftToModel();
+            btnListenModel.setBackgroundColor(0xFFD97706); // Amber active
+            btnListenModel.setTextColor(0xFFFFFFFF);
+            btnListenReal.setBackgroundColor(0xFF334155);  // Gray inactive
+            btnListenReal.setTextColor(0xFFCBD5E1);
+            tvStatus.setText("🎧 Live Track: ⚡ MODEL FILTERED");
         });
+
+        // Seamless Dual-Track Playback
+        if (btnPlaySeamlessLive != null) {
+            btnPlaySeamlessLive.setOnClickListener(v -> {
+                if (!shifterEngine.isPlaying()) {
+                    if (lastRecordedRaw == null || lastRecordedFiltered == null) return;
+                    shifterEngine.startSeamlessPlayback(lastRecordedRaw, lastRecordedFiltered, AudioRecordPlayerEngine.SAMPLE_RATE, () -> mainHandler.post(() -> {
+                        btnPlaySeamlessLive.setText("▶️ PLAY RECORDING (ENABLES LIVE SHIFTING)");
+                        tvStatus.setText("Playback finished.");
+                    }));
+                    btnPlaySeamlessLive.setText("⏹️ STOP PLAYBACK");
+                    tvStatus.setText("Playing: Tap buttons above to shift between Real and Model in real time!");
+                } else {
+                    shifterEngine.stop();
+                    btnPlaySeamlessLive.setText("▶️ PLAY RECORDING (ENABLES LIVE SHIFTING)");
+                    tvStatus.setText("Playback stopped.");
+                }
+            });
+        }
 
         btnSave.setOnClickListener(v -> saveRecordingsToStorage());
     }
@@ -145,13 +161,15 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
 
     private void startLiveRecording() {
         audioEngine.stopPlayback();
+        shifterEngine.stop();
         boolean started = audioEngine.startRecording();
         if (started) {
             btnRecordToggle.setText("STOP RECORDING");
             btnRecordToggle.setBackgroundColor(0xFFDC2626); // Alert Red
-            tvStatus.setText("Recording in progress... Live filtering active.");
+            tvStatus.setText("Recording in progress... Live adaptive filter actively tracking.");
             btnListenReal.setEnabled(false);
             btnListenModel.setEnabled(false);
+            if (btnPlaySeamlessLive != null) btnPlaySeamlessLive.setEnabled(false);
             btnSave.setEnabled(false);
         } else {
             Toast.makeText(getContext(), "Failed to open microphone", Toast.LENGTH_SHORT).show();
@@ -162,7 +180,7 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
         audioEngine.stopRecording();
         btnRecordToggle.setText("START LIVE RECORDING");
         btnRecordToggle.setBackgroundColor(0xFF0284C7); // Vibrant Blue
-        tvStatus.setText("Recording stopped. Select an option below.");
+        tvStatus.setText("Recording stopped. Tap Play Recording and test A/B shifting!");
 
         lastRecordedRaw = audioEngine.getRecordedRawAudio();
         lastRecordedFiltered = audioEngine.getRecordedFilteredAudio();
@@ -170,6 +188,7 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
         boolean hasData = (lastRecordedRaw != null && lastRecordedRaw.length > 0);
         btnListenReal.setEnabled(hasData);
         btnListenModel.setEnabled(hasData);
+        if (btnPlaySeamlessLive != null) btnPlaySeamlessLive.setEnabled(hasData);
         btnSave.setEnabled(hasData);
 
         if (hasData) {
@@ -193,8 +212,8 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
             WavFileHelper.saveWavFile(rawFile, lastRecordedRaw, AudioRecordPlayerEngine.SAMPLE_RATE);
             WavFileHelper.saveWavFile(filteredFile, lastRecordedFiltered, AudioRecordPlayerEngine.SAMPLE_RATE);
 
-            Toast.makeText(getContext(), "Saved to:\n" + rawFile.getName() + "\n" + filteredFile.getName(), Toast.LENGTH_LONG).show();
-            tvStatus.setText("Files saved: " + filteredFile.getName());
+            Toast.makeText(getContext(), "Saved to:\n" + filteredFile.getName(), Toast.LENGTH_LONG).show();
+            tvStatus.setText("Saved to: " + filteredFile.getName());
         } catch (Exception e) {
             Toast.makeText(getContext(), "Error saving files: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -210,9 +229,18 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
                 AdaptiveFilter filter = ModelManager.getInstance().getActiveFilter();
                 double cov = (filter != null) ? filter.getEmpiricalCoverage() : 0.0;
                 double wink = (filter != null) ? filter.getWinklerScore() : 0.0;
+
+                // Track ERLE power
+                runningPowerRaw = 0.95 * runningPowerRaw + 0.05 * (latestOutput.desired * latestOutput.desired);
+                runningPowerFilt = 0.95 * runningPowerFilt + 0.05 * (latestOutput.error * latestOutput.error);
+                double erle = 10.0 * Math.log10(Math.max(1e-6, runningPowerRaw) / Math.max(1e-6, runningPowerFilt));
+
+                double surge = Math.abs(latestOutput.error) / Math.max(1e-4, (latestOutput.upperBound - latestOutput.lowerBound) / 3.29);
+                String deadBand = (cov >= 90.0) ? "SLEEP" : "ACTIVE";
+
                 tvMetrics.setText(String.format(Locale.US,
-                        "Step Size mu: %.4f | Coverage: %.1f%% | Winkler: %.3f",
-                        latestOutput.stepSize, cov, wink));
+                        "Step Size μ: %.4f | Coverage: %.1f%% | Winkler: %.3f\nERLE: %+.1f dB | Surge: %.2f σ | Dead-band: %s | FLOPs: 133",
+                        latestOutput.stepSize, cov, wink, erle, surge, deadBand));
             }
         });
     }
@@ -224,5 +252,6 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
             audioEngine.stopRecording();
             audioEngine.stopPlayback();
         }
+        shifterEngine.stop();
     }
 }

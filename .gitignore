@@ -49,3 +49,7 @@ create_paper_docx.py
 # OS-specific
 .DS_Store
 Thumbs.db
+
+uber-apk-signer.jar
+android_app/uber-apk-signer.jar
+*.idsig

@@ -45,6 +45,8 @@ setup_mingit.py
 *.pdf
 paper_latex/
 create_paper_docx.py
+convert_docs_to_pdf.ps1
+tools/
 
 # OS-specific
 .DS_Store

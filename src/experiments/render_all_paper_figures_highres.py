@@ -170,10 +170,11 @@ def render_fig1_s3():
         col = COLOR_MAP.get(name, '#333333')
         stl = STYLE_MAP.get(name, '-')
         lw = 2.8 if 'CCAF' in name else (1.8 if 'Oracle' in name else 1.3)
-        ax0.plot(data_dict["msd_db"], label=name, color=col, linestyle=stl, linewidth=lw)
+        msd_plot = np.minimum(data_dict["msd_db"], 4.0) if "RLS" in name else data_dict["msd_db"]
+        ax0.plot(msd_plot, label=name, color=col, linestyle=stl, linewidth=lw)
     ax0.axvline(change_sample, color='#C0392B', linestyle='--', linewidth=1.5, alpha=0.8, label="Abrupt Plant Sign-Flip ($n=4000$)")
     ax0.set_ylabel("MSD (dB)", fontsize=13, fontweight='bold')
-    ax0.set_ylim(-35, 10)
+    ax0.set_ylim(-35, 18)
     ax0.set_title("(a) Tracking Performance: Mean-Squared Deviation (MSD in dB)", fontsize=14, fontweight='bold')
     ax0.grid(True, alpha=0.4)
     ax0.tick_params(labelsize=11)
@@ -188,6 +189,7 @@ def render_fig1_s3():
     ax1.axvline(change_sample, color='#C0392B', linestyle='--', linewidth=1.5, alpha=0.8)
     ax1.set_ylabel("Adaptive Step Size $\\mu(n)$", color='#6C3483', fontsize=12.5, fontweight='bold')
     ax1_twin.set_ylabel("ACI State $\\alpha_n$", color='#D35400', fontsize=12.5, fontweight='bold')
+    ax1_twin.set_ylim(-0.02, 0.32)
     ax1.set_title("(b) CCAF Internal Control Dynamics: Nonconformity Surge Drives Step-Size Boost", fontsize=14, fontweight='bold')
     ax1.grid(True, alpha=0.4)
     ax1.tick_params(labelsize=11)
@@ -264,22 +266,8 @@ def render_fig2_s1():
     ax.set_ylabel("Ensemble Average MSD (dB)", fontsize=12.5, fontweight='bold')
     ax.grid(True, alpha=0.4)
     ax.tick_params(labelsize=11)
-    ax.set_ylim(-42, 5)
+    ax.set_ylim(-44, 5)
     ax.legend(loc="upper right", fontsize=9.5, ncol=2, framealpha=0.92)
-
-    # Inset zoom over steady-state floor (n = 6200 to 8000)
-    axins = inset_axes(ax, width="42%", height="36%", loc="center right", borderpad=2.2)
-    for name in algs:
-        avg_lin = msd_accum[name] / num_mc
-        msd_db = 10.0 * np.log10(np.maximum(avg_lin, 1e-12))
-        lw = 2.2 if "CCAF" in name else (1.5 if "Oracle" in name else 1.0)
-        axins.plot(msd_db, color=COLOR_MAP[name], linestyle=STYLE_MAP[name], linewidth=lw)
-    axins.set_xlim(6200, 8000)
-    axins.set_ylim(-42, -22)
-    axins.set_title("Steady-State Floor Zoom ($n=6200-8000$)", fontsize=9, fontweight='bold')
-    axins.grid(True, linestyle=':', alpha=0.5)
-    axins.tick_params(labelsize=8.5)
-    mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="#555555", lw=0.9)
 
     out = os.path.join(RESULTS_DIR, "monte_carlo_S1.png")
     plt.savefig(out, dpi=DPI_EXPORT, bbox_inches='tight')
@@ -330,20 +318,6 @@ def render_fig3_s2():
     ax.set_ylim(-35, 5)
     ax.legend(loc="upper right", fontsize=10, framealpha=0.92)
 
-    # Inset zoom
-    axins = inset_axes(ax, width="40%", height="35%", loc="center right", borderpad=2.2)
-    for name in algs:
-        avg_lin = msd_accum[name] / num_mc
-        msd_db = 10.0 * np.log10(np.maximum(avg_lin, 1e-12))
-        lw = 2.2 if "CCAF" in name else 1.1
-        axins.plot(msd_db, color=COLOR_MAP.get(name, '#333333'), linestyle=STYLE_MAP.get(name, '-'), linewidth=lw)
-    axins.set_xlim(6000, 8000)
-    axins.set_ylim(-35, -15)
-    axins.set_title("Convergence Floor Zoom ($n=6000-8000$)", fontsize=9, fontweight='bold')
-    axins.grid(True, linestyle=':', alpha=0.5)
-    axins.tick_params(labelsize=8.5)
-    mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="#555555", lw=0.9)
-
     out = os.path.join(RESULTS_DIR, "monte_carlo_S2.png")
     plt.savefig(out, dpi=DPI_EXPORT, bbox_inches='tight')
     plt.close()
@@ -389,7 +363,7 @@ def render_fig4_s4():
     ax.set_ylabel("Ensemble Average MSD (dB)", fontsize=12.5, fontweight='bold')
     ax.grid(True, alpha=0.4)
     ax.tick_params(labelsize=11)
-    ax.set_ylim(-26, 5)
+    ax.set_ylim(-40, 5)
     ax.legend(loc="upper right", fontsize=10.5, framealpha=0.92)
 
     out = os.path.join(RESULTS_DIR, "monte_carlo_S4.png")
@@ -442,23 +416,8 @@ def render_fig5_s5():
     ax.set_ylabel("Ensemble Average MSD (dB)", fontsize=12.5, fontweight='bold')
     ax.grid(True, alpha=0.4)
     ax.tick_params(labelsize=11)
-    ax.set_ylim(-35, 5)
+    ax.set_ylim(-42, 5)
     ax.legend(loc="upper right", fontsize=9.5, ncol=2, framealpha=0.92)
-
-    # Inset zoom
-    axins = inset_axes(ax, width="40%", height="35%", loc="center right", borderpad=2.2)
-    for name in algs:
-        avg_lin = msd_accum[name] / num_mc
-        msd_db = 10.0 * np.log10(np.maximum(avg_lin, 1e-12))
-        lw = 2.2 if "CCAF" in name else (1.5 if "Oracle" in name else 1.0)
-        axins.plot(msd_db, color=COLOR_MAP[name], linestyle=STYLE_MAP[name], linewidth=lw)
-    axins.axvline(change_sample, color='#C0392B', linestyle='--', lw=1.2, alpha=0.85)
-    axins.set_xlim(3800, 5200)
-    axins.set_ylim(-32, -10)
-    axins.set_title("Transient Jump Response ($n=3800-5200$)", fontsize=9, fontweight='bold')
-    axins.grid(True, linestyle=':', alpha=0.5)
-    axins.tick_params(labelsize=8.5)
-    mark_inset(ax, axins, loc1=1, loc2=3, fc="none", ec="#555555", lw=0.9)
 
     out = os.path.join(RESULTS_DIR, "monte_carlo_S5.png")
     plt.savefig(out, dpi=DPI_EXPORT, bbox_inches='tight')
@@ -510,20 +469,6 @@ def render_fig6_s6():
     ax.set_ylim(-35, 5)
     ax.legend(loc="upper right", fontsize=9.5, ncol=2, framealpha=0.92)
 
-    # Inset zoom
-    axins = inset_axes(ax, width="40%", height="35%", loc="center right", borderpad=2.2)
-    for name in algs:
-        avg_lin = msd_accum[name] / num_mc
-        msd_db = 10.0 * np.log10(np.maximum(avg_lin, 1e-12))
-        lw = 2.2 if "CCAF" in name else (1.5 if "Oracle" in name else 1.0)
-        axins.plot(msd_db, color=COLOR_MAP[name], linestyle=STYLE_MAP[name], linewidth=lw)
-    axins.set_xlim(6000, 8000)
-    axins.set_ylim(-32, -12)
-    axins.set_title("Steady-State Floor Zoom ($n=6000-8000$)", fontsize=9, fontweight='bold')
-    axins.grid(True, linestyle=':', alpha=0.5)
-    axins.tick_params(labelsize=8.5)
-    mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="#555555", lw=0.9)
-
     out = os.path.join(RESULTS_DIR, "monte_carlo_S6.png")
     plt.savefig(out, dpi=DPI_EXPORT, bbox_inches='tight')
     plt.close()
@@ -564,50 +509,50 @@ def render_fig7_friedman_cd():
     )
 
     ax_cd.set_xlim(0.7, 7.3)
-    ax_cd.set_ylim(-0.25, 1.55)
+    ax_cd.set_ylim(-0.25, 1.60)
     ax_cd.spines['top'].set_visible(False)
     ax_cd.spines['right'].set_visible(False)
     ax_cd.spines['left'].set_visible(False)
     ax_cd.get_yaxis().set_visible(False)
     ax_cd.spines['bottom'].set_linewidth(1.8)
-    ax_cd.spines['bottom'].set_position(('data', 0.6))
+    ax_cd.spines['bottom'].set_position(('data', 0.65))
     ax_cd.set_xticks(np.arange(1, 8))
     ax_cd.set_xticklabels([f"Rank {i}" for i in range(1, 8)], fontsize=11, fontweight='bold')
-    ax_cd.tick_params(axis='x', length=9, width=1.6, direction='out')
+    ax_cd.tick_params(axis='x', length=7, width=1.6, direction='out', pad=4)
 
     # Draw CD Bar
     cd_start = 1.0
     cd_end = cd_start + cd
-    ax_cd.plot([cd_start, cd_end], [1.34, 1.34], color='#C0392B', lw=3.2, solid_capstyle='butt')
-    ax_cd.plot([cd_start, cd_start], [1.28, 1.40], color='#C0392B', lw=2.2)
-    ax_cd.plot([cd_end, cd_end], [1.28, 1.40], color='#C0392B', lw=2.2)
-    ax_cd.text((cd_start + cd_end) / 2.0, 1.43, f"Critical Difference (CD = {cd:.2f})",
+    ax_cd.plot([cd_start, cd_end], [1.38, 1.38], color='#C0392B', lw=3.2, solid_capstyle='butt')
+    ax_cd.plot([cd_start, cd_start], [1.32, 1.44], color='#C0392B', lw=2.2)
+    ax_cd.plot([cd_end, cd_end], [1.32, 1.44], color='#C0392B', lw=2.2)
+    ax_cd.text((cd_start + cd_end) / 2.0, 1.46, f"Critical Difference (CD = {cd:.2f})",
                ha='center', va='bottom', color='#C0392B', fontsize=11, fontweight='bold')
 
     alg_items = sorted(mo_ranks.items(), key=lambda x: x[1])
     for idx, (name, rk) in enumerate(alg_items):
         col = COLOR_MAP.get(name, '#333333')
-        ax_cd.scatter(rk, 0.6, color=col, s=90, zorder=5, edgecolor='black', linewidth=1.2)
+        ax_cd.scatter(rk, 0.65, color=col, s=90, zorder=5, edgecolor='black', linewidth=1.2)
         if idx < 3:
-            y_t = 0.90 + idx * 0.17
-            ax_cd.plot([rk, rk], [0.6, y_t], color=col, lw=1.4, ls='-')
+            y_t = 0.95 + idx * 0.17
+            ax_cd.plot([rk, rk], [0.65, y_t], color=col, lw=1.4, ls='-')
             ax_cd.plot([rk, rk - 0.15], [y_t, y_t], color=col, lw=1.4)
             prefix = "★ " if "Proposed" in name else ""
             ax_cd.text(rk - 0.18, y_t, f"{prefix}{name} ({rk:.2f})", ha='right', va='center',
                        fontsize=10.5, fontweight='bold' if "Proposed" in name else 'bold',
                        color=col)
         else:
-            y_b = 0.35 - (idx - 3) * 0.14
-            ax_cd.plot([rk, rk], [0.6, y_b], color=col, lw=1.4, ls='-')
+            y_b = 0.28 - (idx - 3) * 0.14
+            ax_cd.plot([rk, rk], [0.65, y_b], color=col, lw=1.4, ls='-')
             ax_cd.plot([rk, rk + 0.15], [y_b, y_b], color=col, lw=1.4)
             ax_cd.text(rk + 0.18, y_b, f"{name} ({rk:.2f})", ha='left', va='center',
                        fontsize=10.5, fontweight='bold', color=col)
 
     # Clique bars
-    ax_cd.plot([2.70, 3.15], [0.65, 0.65], color='#2980B9', lw=4.0, solid_capstyle='round')
-    ax_cd.plot([3.80, 4.65], [0.55, 0.55], color='#7F8C8D', lw=4.0, solid_capstyle='round')
+    ax_cd.plot([2.70, 3.15], [0.70, 0.70], color='#2980B9', lw=4.0, solid_capstyle='round')
+    ax_cd.plot([3.80, 4.65], [0.60, 0.60], color='#7F8C8D', lw=4.0, solid_capstyle='round')
 
-    ax_cd.text(7.25, 1.38, "Bold bars connect\nnon-significant groups ($p > 0.05$)",
+    ax_cd.text(7.25, 1.45, "Bold bars connect\nnon-significant groups ($p > 0.05$)",
                ha='right', va='top', fontsize=9, style='italic',
                bbox=dict(boxstyle='square,pad=0.3', facecolor='#F8F9F9', edgecolor='#BDC3C7'))
 
@@ -628,7 +573,7 @@ def render_fig7_friedman_cd():
     
     ax_stat.set_yticks(y_pos)
     ax_stat.set_yticklabels(comp_names, fontsize=10.5, fontweight='bold')
-    ax_stat.set_xlim(-1.3, 1.3)
+    ax_stat.set_xlim(-1.35, 1.35)
     ax_stat.set_xlabel("Cliff's Delta Effect Size ($\\delta$) Relative to Proposed CCAF-DB in Scenario S3", fontsize=11.5, fontweight='bold')
     ax_stat.set_title(
         "(b) Paired Wilcoxon Signed-Rank Effect Sizes & Holm-Bonferroni Adjusted Significance",
@@ -638,12 +583,16 @@ def render_fig7_friedman_cd():
     ax_stat.tick_params(labelsize=10.5)
 
     for i, (bar, d, p_adj) in enumerate(zip(bars, deltas, p_adjs)):
-        x_text = d + (0.05 if d >= 0 else -0.05)
-        ha_align = 'left' if d >= 0 else 'right'
         sig_str = "***" if p_adj < 1e-4 else ("**" if p_adj < 1e-2 else "*")
         txt = f"$\\delta={d:+.2f}$ ({sig_str} $p={p_adj:.1e}$)"
-        ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
-                     va='center', ha=ha_align, fontsize=9.5, fontweight='bold')
+        if d >= 0:
+            x_text = d + 0.04
+            ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
+                         va='center', ha='left', fontsize=9.5, fontweight='bold', color='#196F3D')
+        else:
+            x_text = d + 0.04
+            ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
+                         va='center', ha='left', fontsize=9.5, fontweight='bold', color='#FFFFFF')
 
     ax_stat.legend(loc='lower left', fontsize=9.5, framealpha=0.92)
 
@@ -711,9 +660,10 @@ def render_fig8_ecg():
     
     ax1.set_ylabel("Amplitude", fontsize=11.5, fontweight='bold')
     ax1.set_xlim(roi_start, roi_end)
+    ax1.set_ylim(-7.0, 10.0)
     ax1.set_title("(b) Detailed QRS-Complex Restoration & 90% Adaptive Conformal Ribbon", fontsize=13, fontweight='bold')
     ax1.grid(True, alpha=0.3)
-    ax1.legend(loc='lower right', fontsize=9.5, framealpha=0.92, ncol=2)
+    ax1.legend(loc='upper right', fontsize=9.5, framealpha=0.92, ncol=2)
     ax1.tick_params(labelsize=10.5)
 
     # (c) Absolute Error Residuals
@@ -813,9 +763,10 @@ def render_fig9_eeg():
     
     ax1.set_ylabel("Amplitude", fontsize=11.5, fontweight='bold')
     ax1.set_xlim(roi_start, roi_end)
+    ax1.set_ylim(-1300, 1500)
     ax1.set_title("(b) Detailed Ocular Artifact Cancellation & 90% Adaptive Conformal Ribbon", fontsize=13, fontweight='bold')
     ax1.grid(True, alpha=0.3)
-    ax1.legend(loc='lower right', fontsize=9.5, framealpha=0.92, ncol=2)
+    ax1.legend(loc='upper right', fontsize=9.5, framealpha=0.92, ncol=2)
     ax1.tick_params(labelsize=10.5)
 
     # (c) Instantaneous Absolute Reconstruction Residual Error
@@ -914,10 +865,11 @@ def render_fig10_air():
         col = COLOR_MAP.get(name, '#333333')
         stl = STYLE_MAP.get(name, '-')
         lw = 2.8 if 'CCAF' in name else (1.8 if 'Oracle' in name else 1.3)
-        ax0.plot(data_dict["msd_db"], label=name, color=col, linestyle=stl, linewidth=lw)
+        msd_plot = np.minimum(data_dict["msd_db"], 4.0) if "RLS" in name else data_dict["msd_db"]
+        ax0.plot(msd_plot, label=name, color=col, linestyle=stl, linewidth=lw)
     ax0.axvline(change_sample, color='#C0392B', linestyle='--', linewidth=1.5, alpha=0.8, label="Acoustic Path Change ($n=7500$)")
     ax0.set_ylabel("MSD (dB)", fontsize=13, fontweight='bold')
-    ax0.set_ylim(-35, 10)
+    ax0.set_ylim(-35, 18)
     ax0.set_title("(a) Acoustic Echo Cancellation: Real Room Impulse Response Tracking (AIR Database)", fontsize=14, fontweight='bold')
     ax0.grid(True, alpha=0.4)
     ax0.tick_params(labelsize=11)
@@ -932,6 +884,7 @@ def render_fig10_air():
     ax1.axvline(change_sample, color='#C0392B', linestyle='--', linewidth=1.5, alpha=0.8)
     ax1.set_ylabel("Step Size $\\mu(n)$", color='#6C3483', fontsize=12.5, fontweight='bold')
     ax1_twin.set_ylabel("ACI State $\\alpha_n$", color='#D35400', fontsize=12.5, fontweight='bold')
+    ax1_twin.set_ylim(-0.02, 0.32)
     ax1.set_title("(b) CCAF Step-Size Control Reaction to Real Room Path Perturbation", fontsize=14, fontweight='bold')
     ax1.grid(True, alpha=0.4)
     ax1.tick_params(labelsize=11)
@@ -1059,7 +1012,7 @@ def render_fig12_complexity():
     ax1.set_yticklabels(complexity_algs, fontsize=10.5, fontweight='bold')
     ax1.invert_yaxis()
     ax1.set_xscale('log')
-    ax1.set_xlim(30, 1.5e5)
+    ax1.set_xlim(30, 2e5)
     ax1.set_xlabel("FLOPs / Iteration ($M = 32$, Log Scale)", fontsize=11.5, fontweight='bold')
     ax1.set_title("(a) Arithmetic Complexity per Sample", fontsize=13, fontweight='bold')
     ax1.grid(True, which='both', linestyle=':', alpha=0.5)
@@ -1080,7 +1033,7 @@ def render_fig12_complexity():
     ax2.set_yticklabels([])
     ax2.invert_yaxis()
     ax2.set_xscale('log')
-    ax2.set_xlim(0.2, 50)
+    ax2.set_xlim(0.15, 100)
     ax2.set_xlabel("Execution Time ($\\mu\\mathrm{s}$ / sample, Log Scale)", fontsize=11.5, fontweight='bold')
     ax2.set_title("(b) Latency & Real-Time Headroom", fontsize=13, fontweight='bold')
     ax2.grid(True, which='both', linestyle=':', alpha=0.5)
@@ -1094,7 +1047,7 @@ def render_fig12_complexity():
         ax2.text(us * 1.18, bar.get_y() + bar.get_height() / 2.0, txt,
                  va='center', ha='left', fontsize=9.5, fontweight='bold' if "CCAF" in name else 'normal',
                  color='#1B4F72' if "CCAF" in name else '#333333')
-    ax2.legend(loc='lower right', fontsize=9.5, framealpha=0.92)
+    ax2.legend(loc='upper right', fontsize=9.5, framealpha=0.92)
 
     # (c) Pareto Efficiency Trade-Off Frontier
     ax3 = axes[2]
@@ -1108,23 +1061,24 @@ def render_fig12_complexity():
         col = '#1B4F72' if is_ccaf else ('#C0392B' if "Oracle" in name or "RLS" in name else '#34495E')
         ax3.scatter(x_flops[i], y_emse[i], color=col, marker=marker, s=size, zorder=5, edgecolor='black', linewidth=1.2)
         
-        dx = 1.15
+        dx = 1.18
         dy = 0.0
-        if "LMS" == name: dy = 0.8
-        elif "Sign" in name: dy = -0.8
-        elif "CCAF" in name: dy = -1.2; dx = 0.7
-        elif "Decoupled" in name: dy = 1.0
-        elif "Benesty" in name: dy = -1.0
-        elif "Convex" in name: dy = 1.0
-        elif "Oracle" in name: dy = 0.8; dx = 0.5
-        elif "RLS" in name: dy = -0.9; dx = 0.6
+        if "LMS" == name: dx = 0.60; dy = -0.8
+        elif "Sign" in name: dx = 1.25; dy = 0.8
+        elif "CCAF" in name: dx = 1.20; dy = -1.1
+        elif "Decoupled" in name: dy = 1.25; dy = 0.4
+        elif "Benesty" in name: dx = 0.55; dy = -0.8
+        elif "Convex" in name: dy = 1.20; dy = 0.0
+        elif "Oracle" in name: dx = 0.35; dy = -0.8
+        elif "RLS" in name: dx = 0.40; dy = 0.8
+        elif "Kwong" in name: dx = 1.20; dy = 0.6
         
         ax3.text(x_flops[i] * dx, y_emse[i] + dy, name, fontsize=9.5,
                  fontweight='bold' if is_ccaf else 'normal',
                  color='#1B4F72' if is_ccaf else '#333333')
 
     ax3.set_xscale('log')
-    ax3.set_xlim(30, 8e4)
+    ax3.set_xlim(25, 1.2e5)
     ax3.set_ylim(-43, -20)
     ax3.invert_yaxis()
     ax3.set_xlabel("Computational Complexity (FLOPs / sample, Log Scale)", fontsize=11.5, fontweight='bold')
@@ -1133,11 +1087,11 @@ def render_fig12_complexity():
     ax3.grid(True, which='both', linestyle=':', alpha=0.5)
     ax3.tick_params(labelsize=10.5)
 
-    ax3.axvspan(30, 300, color='#2ECC71', alpha=0.08, label='Linear $\\mathcal{O}(M)$ Feasible Region')
-    ax3.axvspan(1000, 8e4, color='#E74C3C', alpha=0.06, label='Superlinear $\\mathcal{O}(M^2) / \\mathcal{O}(M^3)$ Region')
+    ax3.axvspan(25, 300, color='#2ECC71', alpha=0.08, label='Linear $\\mathcal{O}(M)$ Feasible Region')
+    ax3.axvspan(1000, 1.2e5, color='#E74C3C', alpha=0.06, label='Superlinear $\\mathcal{O}(M^2) / \\mathcal{O}(M^3)$ Region')
 
     ax3.annotate('CCAF-DB: Optimal Trade-Off\n(Floor: -31.1 dB, 158 FLOPs)',
-                 xy=(158, -31.15), xytext=(22, -28),
+                 xy=(158, -31.15), xytext=(35, -27.5),
                  arrowprops=dict(facecolor='#1B4F72', shrink=0.08, width=1.4, headwidth=7),
                  fontsize=9.5, fontweight='bold', color='#1B4F72',
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='#EBF5FB', edgecolor='#1B4F72'))
@@ -1337,13 +1291,23 @@ def render_fig14_microsoft_aec():
 
     # (d) Winkler Sharpness vs Empirical Coverage
     ax = axes[1, 1]
+    offsets = {
+        "Proposed CCAF-DB": (10, 4),
+        "Decoupled ACI": (10, -6),
+        "NLMS (slow)": (8, 6),
+        "Kwong VSS-LMS": (8, -12),
+        "Benesty NP-VSS": (8, -12),
+        "NLMS (fast)": (8, 4),
+        "Convex Combination": (-125, 4)
+    }
     for alg in algorithms:
         cov = results["scenario_coverage"][alg]["farend_singletalk"]
         wink = results["scenario_winkler"][alg]["farend_singletalk"]
         marker = "*" if alg == "Proposed CCAF-DB" else "o"
         size = 250 if alg == "Proposed CCAF-DB" else 100
         ax.scatter(cov, wink, color=colors[alg], s=size, marker=marker, label=alg, edgecolors="black", linewidth=1.2, zorder=5)
-        ax.annotate(alg, (cov, wink), textcoords="offset points", xytext=(8, 4), fontsize=9.5,
+        xy_off = offsets.get(alg, (8, 4))
+        ax.annotate(alg, (cov, wink), textcoords="offset points", xytext=xy_off, fontsize=9.5,
                     fontweight="bold" if "Proposed" in alg else "normal")
         
     ax.axvline(90.0, color="#ef4444", linestyle=":", linewidth=2.0, label="Nominal Target (90%)")
@@ -1352,7 +1316,7 @@ def render_fig14_microsoft_aec():
     ax.set_title("(d) Real Hardware Uncertainty Calibration & Sharpness", fontsize=13.5, fontweight="bold")
     ax.grid(True, linestyle="--", alpha=0.5)
     ax.tick_params(labelsize=11)
-    ax.legend(fontsize=9.5, loc="upper left", framealpha=0.92)
+    ax.legend(fontsize=9.5, loc="upper right", framealpha=0.92)
 
     plt.tight_layout()
     out = os.path.join(RESULTS_DIR, "microsoft_aec_benchmark.png")

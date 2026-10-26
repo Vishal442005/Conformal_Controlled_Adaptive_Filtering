@@ -91,7 +91,8 @@ def enhance_ecg_plot():
     ax1.plot(time_zoom, nlms_denoised, label="NLMS Baseline (mu=0.1)", color='#d97706', linestyle='--', linewidth=1.3, zorder=2)
     ax1.set_ylabel("Amplitude", fontsize=9.5)
     ax1.set_title("(b) Morphological Detail: QRS Peak Preservation & Distribution-Free Confidence Envelope", fontsize=11, fontweight='bold', loc='left')
-    ax1.legend(loc="upper right", fontsize=8.5, framealpha=0.9, ncol=2)
+    ax1.set_ylim(-7.0, 10.0)
+    ax1.legend(loc="upper right", fontsize=8.5, framealpha=0.92, ncol=2)
     ax1.grid(True, linestyle=':', alpha=0.6)
     ax1.set_xlim(zoom_start, zoom_end)
 
@@ -126,8 +127,9 @@ def enhance_ecg_plot():
 
     out_path = os.path.abspath("results/s7_ecg_validation.png")
     plt.savefig(out_path, dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.abspath("paper_latex/figures/s7_ecg_validation.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"[SUCCESS] Enhanced ECG figure saved to: {out_path}")
+    print(f"[SUCCESS] Enhanced ECG figure saved to: {out_path} and paper_latex/figures/")
 
 if __name__ == "__main__":
     enhance_ecg_plot()

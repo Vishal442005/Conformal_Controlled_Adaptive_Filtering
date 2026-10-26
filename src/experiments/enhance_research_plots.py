@@ -78,24 +78,24 @@ def enhance_friedman_cd_diagram():
 
     # Axis ruler for ranks 1 to 7
     ax_cd.set_xlim(0.8, 7.2)
-    ax_cd.set_ylim(-0.2, 1.5)
+    ax_cd.set_ylim(-0.25, 1.6)
     ax_cd.spines['top'].set_visible(False)
     ax_cd.spines['right'].set_visible(False)
     ax_cd.spines['left'].set_visible(False)
     ax_cd.get_yaxis().set_visible(False)
     ax_cd.spines['bottom'].set_linewidth(1.5)
-    ax_cd.spines['bottom'].set_position(('data', 0.6))
+    ax_cd.spines['bottom'].set_position(('data', 0.65))
     ax_cd.set_xticks(np.arange(1, 8))
     ax_cd.set_xticklabels([f"Rank {i}" for i in range(1, 8)], fontsize=9, fontweight='bold')
-    ax_cd.tick_params(axis='x', length=8, width=1.5, direction='out')
+    ax_cd.tick_params(axis='x', length=6, width=1.5, direction='out', pad=4)
 
     # Draw CD Bar at the top
     cd_start = 1.0
     cd_end = cd_start + cd
-    ax_cd.plot([cd_start, cd_end], [1.32, 1.32], color='#C0392B', lw=3.0, solid_capstyle='butt')
-    ax_cd.plot([cd_start, cd_start], [1.27, 1.37], color='#C0392B', lw=2.0)
-    ax_cd.plot([cd_end, cd_end], [1.27, 1.37], color='#C0392B', lw=2.0)
-    ax_cd.text((cd_start + cd_end) / 2.0, 1.40, f"Critical Difference (CD = {cd:.2f})",
+    ax_cd.plot([cd_start, cd_end], [1.38, 1.38], color='#C0392B', lw=3.0, solid_capstyle='butt')
+    ax_cd.plot([cd_start, cd_start], [1.33, 1.43], color='#C0392B', lw=2.0)
+    ax_cd.plot([cd_end, cd_end], [1.33, 1.43], color='#C0392B', lw=2.0)
+    ax_cd.text((cd_start + cd_end) / 2.0, 1.46, f"Critical Difference (CD = {cd:.2f})",
                ha='center', va='bottom', color='#C0392B', fontsize=9, fontweight='bold')
 
     # Plot algorithms: Left side (ranks 1 to 3), Right side (ranks 4 to 7)
@@ -110,48 +110,36 @@ def enhance_friedman_cd_diagram():
         "NLMS (fast)": "#C0392B"
     }
 
-    # Split: Top / Bottom connections
-    # We display them with vertical connectors
-    y_labels_top = [1.12, 0.95, 0.78]
-    y_labels_bot = [0.42, 0.25, 0.08, -0.09]
-
-    # First 3 (best) drop up/down
+    # First 3 (best) drop up/down with ample spacing avoiding ticks
     for idx, (name, rk) in enumerate(alg_items):
         col = colors.get(name, '#333333')
         # Draw dot on axis
-        ax_cd.scatter(rk, 0.6, color=col, s=80, zorder=5, edgecolor='black', linewidth=1.0)
+        ax_cd.scatter(rk, 0.65, color=col, s=80, zorder=5, edgecolor='black', linewidth=1.0)
         
         # Position label
         if idx < 3:
             # Top-left quadrant
-            y_t = 0.90 + idx * 0.16
-            ax_cd.plot([rk, rk], [0.6, y_t], color=col, lw=1.2, ls='-')
+            y_t = 0.95 + idx * 0.16
+            ax_cd.plot([rk, rk], [0.65, y_t], color=col, lw=1.2, ls='-')
             ax_cd.plot([rk, rk - 0.15], [y_t, y_t], color=col, lw=1.2)
             prefix = "★ " if "Proposed" in name else ""
             ax_cd.text(rk - 0.18, y_t, f"{prefix}{name} ({rk:.2f})", ha='right', va='center',
                        fontsize=8.5, fontweight='bold' if "Proposed" in name else 'normal',
                        color=col)
         else:
-            # Bottom quadrant
-            y_b = 0.35 - (idx - 3) * 0.13
-            ax_cd.plot([rk, rk], [0.6, y_b], color=col, lw=1.2, ls='-')
+            # Bottom quadrant (cleared comfortably below rank labels at y=0.5)
+            y_b = 0.28 - (idx - 3) * 0.14
+            ax_cd.plot([rk, rk], [0.65, y_b], color=col, lw=1.2, ls='-')
             ax_cd.plot([rk, rk + 0.15], [y_b, y_b], color=col, lw=1.2)
             ax_cd.text(rk + 0.18, y_b, f"{name} ({rk:.2f})", ha='left', va='center',
                        fontsize=8.5, color=col)
 
     # Significance cliques (horizontal bars linking algorithms not significantly different, diff < CD)
-    # CCAF (1.85) vs Decoupled ACI (2.70): diff = 0.85 > CD (0.71) -> Significantly different! (CCAF is distinct #1)
-    # Decoupled ACI (2.70) vs Kwong (3.15): diff = 0.45 < CD (0.71) -> Not significantly different! Clique 1
-    # Kwong (3.15) vs Benesty (3.80): diff = 0.65 < CD (0.71) -> Clique 2
-    # Benesty (3.80) vs NLMS slow (4.10): diff = 0.30 < CD -> Clique 3
-    # NLMS slow (4.10) vs Convex Comb (4.65): diff = 0.55 < CD -> Clique 4
-    # Draw non-significant clique bar for [Decoupled ACI (2.70), Kwong (3.15)]
-    ax_cd.plot([2.70, 3.15], [0.65, 0.65], color='#2980B9', lw=3.5, solid_capstyle='round')
-    # Draw non-significant clique bar for [Benesty (3.80), NLMS slow (4.10), Convex Comb (4.65)]
-    ax_cd.plot([3.80, 4.65], [0.55, 0.55], color='#7F8C8D', lw=3.5, solid_capstyle='round')
+    ax_cd.plot([2.70, 3.15], [0.70, 0.70], color='#2980B9', lw=3.5, solid_capstyle='round')
+    ax_cd.plot([3.80, 4.65], [0.60, 0.60], color='#7F8C8D', lw=3.5, solid_capstyle='round')
 
     # Add legend note for clique bars
-    ax_cd.text(7.15, 1.35, "Bold segments connect\nnon-significant groups ($p > 0.05$)",
+    ax_cd.text(7.15, 1.45, "Bold segments connect\nnon-significant groups ($p > 0.05$)",
                ha='right', va='top', fontsize=7.5, style='italic',
                bbox=dict(boxstyle='square,pad=0.3', facecolor='#F8F9F9', edgecolor='#BDC3C7'))
 
@@ -176,7 +164,7 @@ def enhance_friedman_cd_diagram():
     
     ax_stat.set_yticks(y_pos)
     ax_stat.set_yticklabels(comp_names, fontsize=8.5, fontweight='bold')
-    ax_stat.set_xlim(-1.25, 1.25)
+    ax_stat.set_xlim(-1.35, 1.35)
     ax_stat.set_xlabel("Cliff's Delta Effect Size ($\delta$) Relative to Proposed CCAF-DB in Scenario S3", fontsize=9)
     ax_stat.set_title(
         "(b) Paired Wilcoxon Signed-Rank Effect Sizes & Holm-Bonferroni Adjusted Significance",
@@ -184,20 +172,26 @@ def enhance_friedman_cd_diagram():
     )
     ax_stat.grid(axis='x', linestyle=':', alpha=0.6)
 
-    # Annotate p_adj and delta
+    # Annotate p_adj and delta without colliding with y-axis or boundaries
     for i, (bar, d, p_adj, mdiff) in enumerate(zip(bars, deltas, p_adjs, med_diffs)):
-        x_text = d + (0.05 if d >= 0 else -0.05)
-        ha_align = 'left' if d >= 0 else 'right'
         sig_str = "***" if p_adj < 1e-4 else ("**" if p_adj < 1e-2 else "*")
         txt = f"$\delta={d:+.2f}$ ({sig_str} $p={p_adj:.1e}$)"
-        ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
-                     va='center', ha=ha_align, fontsize=8, fontweight='bold')
+        if d >= 0:
+            x_text = d + 0.04
+            ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
+                         va='center', ha='left', fontsize=8, fontweight='bold', color='#196F3D')
+        else:
+            # Place inside the red bar from the left edge towards 0, ensuring zero collision with y-axis
+            x_text = d + 0.04
+            ax_stat.text(x_text, bar.get_y() + bar.get_height() / 2.0, txt,
+                         va='center', ha='left', fontsize=8, fontweight='bold', color='#FFFFFF')
 
     ax_stat.legend(loc='lower left', fontsize=7.5, framealpha=0.9)
 
     plt.savefig("results/friedman_cd_diagram.png", dpi=300, bbox_inches='tight')
+    plt.savefig("paper_latex/figures/friedman_cd_diagram.png", dpi=300, bbox_inches='tight')
     plt.close()
-    print("  [SAVED] results/friedman_cd_diagram.png (Upgraded to Demšar CD + Wilcoxon Effect Sizes)")
+    print("  [SAVED] results/friedman_cd_diagram.png & paper_latex/figures/ (Upgraded to Demšar CD + Wilcoxon Effect Sizes)")
 
 def enhance_computational_complexity_benchmark():
     """
@@ -235,7 +229,7 @@ def enhance_computational_complexity_benchmark():
     ax1.set_yticklabels(complexity_algs, fontsize=8.5, fontweight='bold')
     ax1.invert_yaxis()
     ax1.set_xscale('log')
-    ax1.set_xlim(30, 1e5)
+    ax1.set_xlim(30, 2e5)
     ax1.set_xlabel("FLOPs / Iteration ($M = 32$, Log Scale)", fontsize=9.5)
     ax1.set_title("(a) Arithmetic Complexity per Sample", fontsize=10.5, fontweight='bold')
     ax1.grid(True, which='both', linestyle=':', alpha=0.5)
@@ -258,7 +252,7 @@ def enhance_computational_complexity_benchmark():
     ax2.set_yticklabels([])
     ax2.invert_yaxis()
     ax2.set_xscale('log')
-    ax2.set_xlim(0.2, 50)
+    ax2.set_xlim(0.15, 80)
     ax2.set_xlabel("Execution Time ($\\mu\\text{s}$ / sample, Log Scale)", fontsize=9.5)
     ax2.set_title("(b) Latency & Real-Time Headroom", fontsize=10.5, fontweight='bold')
     ax2.grid(True, which='both', linestyle=':', alpha=0.5)
@@ -290,29 +284,28 @@ def enhance_computational_complexity_benchmark():
         
         ax3.scatter(x_flops[i], y_emse[i], color=col, marker=marker, s=size, zorder=5, edgecolor='black', linewidth=1.0)
         
-        # Offset label
-        dx = 1.15
+        # Offset label carefully without overlaps
+        dx = 1.18
         dy = 0.0
-        if "LMS" == name: dy = 0.8
-        elif "Sign" in name: dy = -0.8
-        elif "CCAF" in name: dy = -1.2; dx = 0.7
-        elif "Decoupled" in name: dy = 1.0
-        elif "Benesty" in name: dy = -1.0
-        elif "Convex" in name: dy = 1.0
-        elif "Oracle" in name: dy = 0.8; dx = 0.5
-        elif "RLS" in name: dy = -0.9; dx = 0.6
+        if "LMS" == name: dx = 0.60; dy = -0.8
+        elif "Sign" in name: dx = 1.25; dy = 0.8
+        elif "CCAF" in name: dx = 1.20; dy = -1.1
+        elif "Decoupled" in name: dx = 1.25; dy = 0.4
+        elif "Benesty" in name: dx = 0.55; dy = -0.8
+        elif "Convex" in name: dx = 1.20; dy = 0.0
+        elif "Oracle" in name: dx = 0.35; dy = -0.8
+        elif "RLS" in name: dx = 0.40; dy = 0.8
+        elif "Kwong" in name: dx = 1.20; dy = 0.6
         
         ax3.text(x_flops[i] * dx, y_emse[i] + dy, name, fontsize=8,
                  fontweight='bold' if is_ccaf else 'normal',
                  color='#1B4F72' if is_ccaf else '#333333')
 
     # Draw Pareto boundary curve
-    # Frontier points: LMS -> Kwong -> Decoupled ACI -> RLS -> Kalman Oracle
     frontier_x = [64, 136, 151, 158, 3232, 34816]
     frontier_y = [-24.0, -39.41, -35.42, -31.15, -39.5, -40.0]
-    # Highlight CCAF-DB Pareto efficiency region
     ax3.set_xscale('log')
-    ax3.set_xlim(30, 8e4)
+    ax3.set_xlim(25, 1.2e5)
     ax3.set_ylim(-43, -20)
     ax3.invert_yaxis()  # Lower EMSE (more negative dB) is better at bottom
     ax3.set_xlabel("Computational Complexity (FLOPs / sample, Log Scale)", fontsize=9.5)
@@ -321,12 +314,12 @@ def enhance_computational_complexity_benchmark():
     ax3.grid(True, which='both', linestyle=':', alpha=0.5)
 
     # Shaded region of linear O(M) methods
-    ax3.axvspan(30, 300, color='#2ECC71', alpha=0.08, label='Linear $\\mathcal{O}(M)$ Feasible Region')
-    ax3.axvspan(1000, 8e4, color='#E74C3C', alpha=0.06, label='Superlinear $\\mathcal{O}(M^2) / \\mathcal{O}(M^3)$ Region')
+    ax3.axvspan(25, 300, color='#2ECC71', alpha=0.08, label='Linear $\\mathcal{O}(M)$ Feasible Region')
+    ax3.axvspan(1000, 1.2e5, color='#E74C3C', alpha=0.06, label='Superlinear $\\mathcal{O}(M^2) / \\mathcal{O}(M^3)$ Region')
 
-    # Annotate CCAF advantage
+    # Annotate CCAF advantage with decoupled arrow placement
     ax3.annotate('CCAF-DB: Optimal Trade-Off\n(Floor: -31.1 dB, 158 FLOPs)',
-                 xy=(158, -31.15), xytext=(25, -28),
+                 xy=(158, -31.15), xytext=(35, -27.5),
                  arrowprops=dict(facecolor='#1B4F72', shrink=0.08, width=1.2, headwidth=6),
                  fontsize=8, fontweight='bold', color='#1B4F72',
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='#EBF5FB', edgecolor='#1B4F72'))
@@ -335,6 +328,8 @@ def enhance_computational_complexity_benchmark():
 
     plt.tight_layout()
     plt.savefig("results/computational_complexity_benchmark.png", dpi=300, bbox_inches='tight')
+    plt.savefig("paper_latex/figures/computational_complexity_benchmark.png", dpi=300, bbox_inches='tight')
+    plt.close()
     plt.close()
     print("  [SAVED] results/computational_complexity_benchmark.png (Upgraded to 3-panel Pareto benchmark)")
 
@@ -409,9 +404,10 @@ def enhance_eeg_validation_plot():
     
     ax1.set_ylabel("Amplitude", fontsize=9)
     ax1.set_xlim(roi_start, roi_end)
+    ax1.set_ylim(-1300, 1500)
     ax1.set_title("(b) Detailed Ocular Artifact Cancellation & 90% Adaptive Conformal Ribbon", fontsize=10.5, fontweight='bold')
     ax1.grid(True, alpha=0.3)
-    ax1.legend(loc='lower right', fontsize=8, framealpha=0.9, ncol=2)
+    ax1.legend(loc='upper right', fontsize=8, framealpha=0.92, ncol=2)
 
     # -------------------------------------------------------------
     # Panel (c): Instantaneous Absolute Reconstruction Residual Error
@@ -451,8 +447,9 @@ def enhance_eeg_validation_plot():
 
     plt.tight_layout()
     plt.savefig("results/s7_eeg_validation.png", dpi=300, bbox_inches='tight')
+    plt.savefig("paper_latex/figures/s7_eeg_validation.png", dpi=300, bbox_inches='tight')
     plt.close()
-    print("  [SAVED] results/s7_eeg_validation.png (Upgraded to 4-panel publication layout)")
+    print("  [SAVED] results/s7_eeg_validation.png & paper_latex/figures/ (Upgraded to 4-panel publication layout)")
 
 def enhance_monte_carlo_s1_and_s5():
     """

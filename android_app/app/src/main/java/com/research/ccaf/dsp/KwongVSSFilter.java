@@ -26,7 +26,7 @@ public class KwongVSSFilter extends AbstractAdaptiveFilter {
     }
 
     public KwongVSSFilter() {
-        this(64, 0.005, 0.50, 0.97, 0.05);
+        this(64, 0.01, 0.60, 0.97, 0.15);
     }
 
     @Override

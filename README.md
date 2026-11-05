@@ -1,10 +1,23 @@
 # Conformal-Controlled Adaptive Filtering (CCAF)
 
-Official implementation, experimental benchmarks, and reproduction suite for the paper:  
-**"Conformal-Controlled Adaptive Filtering: Distribution-Free Guarantees and Coverage-Driven Step-Size Control"**
+Official implementation, experimental benchmarks, and reproduction suite for:  
+**"Conformal-Controlled Adaptive Filtering: Distribution-Free Uncertainty Bounds and Coverage-Driven Step-Size Control"**
 
+[![Release](https://img.shields.io/badge/release-v1.2.0-blue.svg)](https://github.com/Vishal442005/Conformal_Controlled_Adaptive_Filtering/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23609984.svg)](https://doi.org/10.5281/zenodo.23609984)
+[![ORCID: Vishal Chandel](https://img.shields.io/badge/ORCID-0009--0006--0552--8551-green.svg)](https://orcid.org/0009-0006-0552-8551)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 👥 Authors & Affiliations
+
+* **Vishal Chandel** (Corresponding Author) — Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India  
+  *ORCID:* [`0009-0006-0552-8551`](https://orcid.org/0009-0006-0552-8551) | *Email:* `chandelvishal445@gmail.com`
+* **Jyotiraditya Singh** — Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India
+* **Ajeet Thakur** (Co-Corresponding Author) — Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India  
+  *Email:* `ajeet.19eez0028@iitrpr.ac.in`
 
 ---
 
@@ -72,12 +85,27 @@ Classical adaptive filters (LMS, NLMS, RLS, Kalman) provide point predictions wi
 Clone this repository and install dependencies:
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/Vishal442005/Conformal_Controlled_Adaptive_Filtering.git
+cd Conformal_Controlled_Adaptive_Filtering
 pip install -r requirements.txt
 ```
 
-### 2. Download Datasets (Optional if already extracted in `data/`)
+### 2. Android Edge Mobile Application (v1.2.0)
+
+For mobile edge deployment and real-time acoustic demonstration, download the signed release APK:
+* **Direct APK Download:** [`android_app/CCAF_Adaptive_Filter_v1.2.0.apk`](android_app/CCAF_Adaptive_Filter_v1.2.0.apk)
+* **Features:**
+  - Real-time live audio recording with dual-channel acoustic echo cancellation & noise suppression
+  - File-based processing (.wav) with side-by-side audio playback comparison (Original vs. Filtered)
+  - Interactive Model Selector supporting:
+    - **CCAF Dead-Band (Proposed)** — Distribution-free coverage-driven step-size control
+    - **Benesty Non-Parametric VSS** — Power-ratio variable step-size
+    - **Convex Combination Filter** — Fast/slow convex filter mixture
+    - **Kwong VSS** — Squared-error variable step-size
+    - **NLMS (Fast & Slow)** — Standard normalized LMS baselines
+  - Custom model configuration import/export (.json)
+
+### 3. Download Datasets (Optional if already extracted in `data/`)
 
 To automatically fetch real-world data (MIT-BIH ECG and EEGdenoiseNet):
 ```bash
@@ -85,7 +113,7 @@ python src/data/download_real_data.py
 ```
 *Note: The Aachen Impulse Response Database is located under `data/air/AIR_1_4/`.*
 
-### 3. Run Everything (One-Command Reproduction)
+### 4. Run Everything (One-Command Reproduction)
 
 To execute the entire simulation suite, benchmarks, ablations, and generate all result plots:
 ```bash
@@ -165,14 +193,25 @@ This generates:
 
 ## 📜 Citation
 
-If you find this code or research useful in your work, please cite:
+If you find this code, benchmark suite, or research useful in your work, please cite:
 
 ```bibtex
-@article{ccaf2026,
-  title={Conformal-Controlled Adaptive Filtering: Distribution-Free Guarantees and Coverage-Driven Step-Size Control},
-  author={Signal Processing and Adaptive Systems Research Group},
-  journal={arXiv preprint},
-  year={2026}
+@software{chandel2026ccaf,
+  author       = {Chandel, Vishal and Singh, Jyotiraditya and Thakur, Ajeet},
+  title        = {{Conformal-Controlled Adaptive Filtering: Distribution-Free Uncertainty Bounds and Coverage-Driven Step-Size Control}},
+  month        = nov,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v1.2.0},
+  doi          = {10.5281/zenodo.23609984},
+  url          = {https://doi.org/10.5281/zenodo.23609984}
+}
+
+@article{chandel2026conformal,
+  title        = {Conformal-Controlled Adaptive Filtering: Distribution-Free Uncertainty Bounds and Coverage-Driven Step-Size Control},
+  author       = {Chandel, Vishal and Singh, Jyotiraditya and Thakur, Ajeet},
+  journal      = {IEEE Transactions on Signal Processing (Under Review)},
+  year         = {2026}
 }
 ```
 

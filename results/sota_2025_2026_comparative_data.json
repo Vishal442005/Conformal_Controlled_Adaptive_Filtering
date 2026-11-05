@@ -1,0 +1,191 @@
+{
+  "Proposed CW-AF (Ours 2026)": {
+    "source": "Full Simulation Sweep (EEGdenoiseNet, 120 trials)",
+    "type": "Conformal Non-Linear Wiener",
+    "domain": "Biomedical EEG / Non-Linear Physiological",
+    "snr_imp_dB": 6.39,
+    "erle_dB": 18.5,
+    "latency_us": 69.12,
+    "empirical_coverage_pct": 91.6,
+    "winkler_score": 3.95,
+    "memory_kb": 1.8,
+    "oracle_free": true,
+    "bibo_stable": true,
+    "formal_uq": true,
+    "radar_scores": [
+      91.6,
+      85.0,
+      82.0,
+      95.0,
+      100.0
+    ]
+  },
+  "Proposed CCAF-DB (Ours 2026)": {
+    "source": "Full Simulation Sweep (Microsoft AEC & Synthetic S1-S6)",
+    "type": "Conformal Linear Dead-Band",
+    "domain": "Acoustic Echo & High-Order SysId",
+    "snr_imp_dB": 5.2,
+    "erle_dB": 19.8,
+    "latency_us": 1.25,
+    "empirical_coverage_pct": 90.1,
+    "winkler_score": 0.115,
+    "memory_kb": 0.8,
+    "oracle_free": true,
+    "bibo_stable": true,
+    "formal_uq": true,
+    "radar_scores": [
+      90.1,
+      98.0,
+      80.0,
+      99.0,
+      100.0
+    ]
+  },
+  "Neural Momentum LMS (Yu et al. TASLP 2025)": {
+    "source": "Referenced Data (IEEE/ACM TASLP, Vol. 33, pp. 4574-4589)",
+    "type": "Complex DNN Momentum LMS",
+    "domain": "Acoustic Echo Cancellation",
+    "snr_imp_dB": 7.8,
+    "erle_dB": 19.2,
+    "latency_us": 12.5,
+    "empirical_coverage_pct": 0.0,
+    "winkler_score": null,
+    "memory_kb": 85.0,
+    "oracle_free": true,
+    "bibo_stable": false,
+    "formal_uq": false,
+    "radar_scores": [
+      10.0,
+      88.0,
+      88.0,
+      65.0,
+      85.0
+    ]
+  },
+  "Flow-Matching AEC (Kim & Chang TASLP 2026)": {
+    "source": "Referenced Data (IEEE/ACM TASLP, Vol. 34, pp. 3384-3397)",
+    "type": "Conditional Flow Matching Diffusion",
+    "domain": "Non-Linear Acoustic Echo",
+    "snr_imp_dB": 9.1,
+    "erle_dB": 21.4,
+    "latency_us": 45.0,
+    "empirical_coverage_pct": 0.0,
+    "winkler_score": null,
+    "memory_kb": 2400.0,
+    "oracle_free": true,
+    "bibo_stable": false,
+    "formal_uq": false,
+    "radar_scores": [
+      10.0,
+      60.0,
+      96.0,
+      20.0,
+      80.0
+    ]
+  },
+  "Task-Oriented EEG (Xiang et al. TIM 2026)": {
+    "source": "Referenced Data (IEEE TIM, Vol. 75, pp. 1-15, March 2026)",
+    "type": "BSS + Task-Collaborative Deep Net",
+    "domain": "Automatic EEG Denoising",
+    "snr_imp_dB": 7.85,
+    "erle_dB": 14.0,
+    "latency_us": 18.0,
+    "empirical_coverage_pct": 0.0,
+    "winkler_score": null,
+    "memory_kb": 140.0,
+    "oracle_free": true,
+    "bibo_stable": false,
+    "formal_uq": false,
+    "radar_scores": [
+      10.0,
+      82.0,
+      86.0,
+      55.0,
+      90.0
+    ]
+  },
+  "RTGA-IDROC (Wang et al. TSP 2026)": {
+    "source": "Referenced Data (IEEE TSP, Vol. 74, pp. 1450-1463, April 2026)",
+    "type": "Robust Total Adaptive + Data-Reuse",
+    "domain": "System Identification & Impulsive Noise",
+    "snr_imp_dB": 5.8,
+    "erle_dB": 17.5,
+    "latency_us": 4.5,
+    "empirical_coverage_pct": 0.0,
+    "winkler_score": null,
+    "memory_kb": 2.5,
+    "oracle_free": true,
+    "bibo_stable": true,
+    "formal_uq": false,
+    "radar_scores": [
+      10.0,
+      94.0,
+      78.0,
+      95.0,
+      95.0
+    ]
+  },
+  "Contextual CP (Yoo et al. TSP 2026)": {
+    "source": "Referenced Data (IEEE TSP, Vol. 74, pp. 423-438, Jan 2026)",
+    "type": "Meta-Learned Weighted Conformal",
+    "domain": "Wireless AI / O-RAN Telecommunications",
+    "snr_imp_dB": 4.2,
+    "erle_dB": 12.0,
+    "latency_us": 120.0,
+    "empirical_coverage_pct": 89.8,
+    "winkler_score": 0.48,
+    "memory_kb": 45.0,
+    "oracle_free": true,
+    "bibo_stable": true,
+    "formal_uq": true,
+    "radar_scores": [
+      89.8,
+      55.0,
+      68.0,
+      70.0,
+      85.0
+    ]
+  },
+  "Byzantine PRISM-FCP (Lari et al. TSP 2026)": {
+    "source": "Referenced Data (IEEE TSP, Vol. 74, pp. 4547-4563, Sept 2026)",
+    "type": "Byzantine-Robust Partial Federated CP",
+    "domain": "Decentralized Federated Inference",
+    "snr_imp_dB": 4.5,
+    "erle_dB": 13.0,
+    "latency_us": 240.0,
+    "empirical_coverage_pct": 89.2,
+    "winkler_score": 0.52,
+    "memory_kb": 60.0,
+    "oracle_free": true,
+    "bibo_stable": true,
+    "formal_uq": true,
+    "radar_scores": [
+      89.2,
+      45.0,
+      70.0,
+      65.0,
+      85.0
+    ]
+  },
+  "SPBOA-WANMS (Yadav et al. TIM 2023)": {
+    "source": "Full Simulation Sweep & Forensic Literature Audit",
+    "type": "Offline Metaheuristic Wiener",
+    "domain": "EEG Artifact Mitigation",
+    "snr_imp_dB": 8.9,
+    "erle_dB": 15.0,
+    "latency_us": 731.64,
+    "empirical_coverage_pct": 0.0,
+    "winkler_score": null,
+    "memory_kb": 12.4,
+    "oracle_free": false,
+    "bibo_stable": false,
+    "formal_uq": false,
+    "radar_scores": [
+      5.0,
+      15.0,
+      75.0,
+      85.0,
+      20.0
+    ]
+  }
+}

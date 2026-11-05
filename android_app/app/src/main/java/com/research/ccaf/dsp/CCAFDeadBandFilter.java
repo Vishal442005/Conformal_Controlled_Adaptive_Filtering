@@ -33,11 +33,11 @@ public class CCAFDeadBandFilter extends AbstractAdaptiveFilter {
         this.currentStepSize = muMin;
         this.conformalQuantile = 1.645; // Initial quantile
         this.empiricalErrorRate = alpha;
-        this.errorRateSmoothing = 0.98;
+        this.errorRateSmoothing = 0.995; // Calibrated for 16kHz speech frame dynamics (~200 samples)
     }
 
     public CCAFDeadBandFilter() {
-        this(64, 0.05, 0.50, 0.005, 0.10, 0.04, 8.0);
+        this(64, 0.03, 0.55, 0.003, 0.10, 0.04, 6.0);
     }
 
     @Override

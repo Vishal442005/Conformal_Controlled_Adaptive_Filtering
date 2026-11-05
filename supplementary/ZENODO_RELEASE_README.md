@@ -1,9 +1,16 @@
 # Supplementary Material & Zenodo Archive
 ## Conformal-Controlled Adaptive Filtering: Distribution-Free Guarantees and Coverage-Driven Step-Size Control
 
+- **Authors:**
+  - **Vishal Chandel** (ORCID: [0009-0006-0552-8551](https://orcid.org/0009-0006-0552-8551), Email: `chandelvishal445@gmail.com`)
+  - **Jyotiraditya Singh** (Department of Electronics & Communication, J.N.G.E.C., Sundernagar, HP, India)
+  - **Ajeet Thakur** (Email: `ajeet.19eez0028@iitrpr.ac.in`)
+- **Version:** v1.2.0
+- **Release Date:** November 2026
 - **Persistent Archive DOI:** [10.5281/zenodo.23609984](https://doi.org/10.5281/zenodo.23609984)
 - **Active Open-Source Repository:** [https://github.com/Vishal442005/Conformal_Controlled_Adaptive_Filtering](https://github.com/Vishal442005/Conformal_Controlled_Adaptive_Filtering)
 - **License:** MIT License
+- **Mobile Edge Demonstrator:** Android APK v1.2.0 (`android_app/CCAF_Adaptive_Filter_v1.2.0.apk`)
 
 ---
 

@@ -170,11 +170,32 @@ public class UniversalAudioHelper {
         private volatile float targetModelMix = 0.0f; // 0.0 = 100% Original, 1.0 = 100% Model
         private float currentModelMix = 0.0f;
 
+        private volatile double[] currentOrigTrack;
+        private volatile double[] currentModelTrack;
+        private volatile int currentPlaybackOffset = 0;
+
+        /**
+         * Dynamically swap or update the model-filtered track during active playback.
+         * The running audio thread immediately switches to the new model samples
+         * at the current playback position with zero interruption.
+         */
+        public synchronized void updateModelTrack(double[] newModel) {
+            this.currentModelTrack = newModel;
+        }
+
+        public synchronized void updateTracks(double[] newOrig, double[] newModel) {
+            this.currentOrigTrack = newOrig;
+            this.currentModelTrack = newModel;
+        }
+
         public void startSeamlessPlayback(double[] orig, double[] model, int sampleRate, Runnable onComplete) {
             stop();
             if (orig == null || model == null) return;
 
-            final int len = Math.min(orig.length, model.length);
+            this.currentOrigTrack = orig;
+            this.currentModelTrack = model;
+            this.currentPlaybackOffset = 0;
+
             final int minBuf = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
             audioTrack = new AudioTrack(
@@ -193,14 +214,23 @@ public class UniversalAudioHelper {
                 short[] buffer = new short[512];
                 int offset = 0;
 
-                while (isRunning && offset < len) {
+                while (isRunning) {
+                    double[] oTrack = currentOrigTrack;
+                    double[] mTrack = currentModelTrack;
+                    if (oTrack == null || mTrack == null) break;
+
+                    int len = Math.min(oTrack.length, mTrack.length);
+                    if (offset >= len) break;
+
+                    currentPlaybackOffset = offset;
                     int chunkSize = Math.min(buffer.length, len - offset);
                     for (int i = 0; i < chunkSize; i++) {
                         // Smooth 10ms crossfade interpolation to prevent click artifacts
                         currentModelMix += (targetModelMix - currentModelMix) * 0.05f;
 
-                        double sOrig = orig[offset + i];
-                        double sModel = model[offset + i];
+                        int idx = offset + i;
+                        double sOrig = (idx < oTrack.length) ? oTrack[idx] : 0.0;
+                        double sModel = (idx < mTrack.length) ? mTrack[idx] : 0.0;
                         double blended = (1.0f - currentModelMix) * sOrig + (currentModelMix) * sModel;
 
                         blended = Math.max(-1.0, Math.min(1.0, blended));
@@ -232,8 +262,16 @@ public class UniversalAudioHelper {
             targetModelMix = 1.0f;
         }
 
+        public boolean isModelSelected() {
+            return targetModelMix >= 0.5f;
+        }
+
         public boolean isPlaying() {
             return isRunning;
+        }
+
+        public int getCurrentPlaybackOffset() {
+            return currentPlaybackOffset;
         }
 
         public void stop() {

@@ -40,12 +40,12 @@ public class ModelManager {
         // 1. Proposed CCAF-DB
         Map<String, Double> ccafParams = new HashMap<>();
         ccafParams.put("taps", 64.0);
-        ccafParams.put("muMin", 0.05);
-        ccafParams.put("muMax", 0.50);
-        ccafParams.put("gamma", 0.005);
+        ccafParams.put("muMin", 0.03);
+        ccafParams.put("muMax", 0.55);
+        ccafParams.put("gamma", 0.003);
         ccafParams.put("alpha", 0.10);
         ccafParams.put("tau", 0.04);
-        ccafParams.put("kappa", 8.0);
+        ccafParams.put("kappa", 6.0);
         ModelInfo proposedModel = new ModelInfo(
                 "ccaf_db",
                 "Proposed CCAF-DB",
@@ -76,12 +76,12 @@ public class ModelManager {
         // 3. NLMS (fast)
         Map<String, Double> fastParams = new HashMap<>();
         fastParams.put("taps", 64.0);
-        fastParams.put("step", 0.50);
+        fastParams.put("step", 0.60);
         availableModels.add(new ModelInfo(
                 "nlms_fast",
                 "NLMS (fast)",
                 "CLASSICAL POINT ESTIMATOR",
-                "Normalized LMS with large step size (mu=0.50). Rapid tracking but high steady-state misadjustment.",
+                "Normalized LMS with aggressive step size (mu=0.60). Rapid tracking but audible steady-state misadjustment.",
                 ModelInfo.ModelType.NLMS_FAST,
                 fastParams,
                 false
@@ -90,12 +90,12 @@ public class ModelManager {
         // 4. NLMS (slow)
         Map<String, Double> slowParams = new HashMap<>();
         slowParams.put("taps", 64.0);
-        slowParams.put("step", 0.05);
+        slowParams.put("step", 0.015);
         availableModels.add(new ModelInfo(
                 "nlms_slow",
                 "NLMS (slow)",
                 "CLASSICAL POINT ESTIMATOR",
-                "Normalized LMS with conservative step size (mu=0.05). Low steady-state EMSE floor but sluggish tracking.",
+                "Normalized LMS with conservative step size (mu=0.015). Low steady-state EMSE floor but sluggish tracking.",
                 ModelInfo.ModelType.NLMS_SLOW,
                 slowParams,
                 false
@@ -104,10 +104,10 @@ public class ModelManager {
         // 5. Kwong VSS-LMS
         Map<String, Double> kwongParams = new HashMap<>();
         kwongParams.put("taps", 64.0);
-        kwongParams.put("muMin", 0.005);
-        kwongParams.put("muMax", 0.50);
+        kwongParams.put("muMin", 0.01);
+        kwongParams.put("muMax", 0.60);
         kwongParams.put("alphaVss", 0.97);
-        kwongParams.put("gammaVss", 0.05);
+        kwongParams.put("gammaVss", 0.15);
         availableModels.add(new ModelInfo(
                 "kwong_vss",
                 "Kwong VSS-LMS",
@@ -122,7 +122,7 @@ public class ModelManager {
         Map<String, Double> benestyParams = new HashMap<>();
         benestyParams.put("taps", 64.0);
         benestyParams.put("muMin", 0.01);
-        benestyParams.put("muMax", 0.50);
+        benestyParams.put("muMax", 0.55);
         benestyParams.put("lambda", 0.98);
         availableModels.add(new ModelInfo(
                 "benesty_vss",
@@ -137,14 +137,14 @@ public class ModelManager {
         // 7. Convex Combination
         Map<String, Double> convexParams = new HashMap<>();
         convexParams.put("taps", 64.0);
-        convexParams.put("muFast", 0.50);
-        convexParams.put("muSlow", 0.05);
-        convexParams.put("muA", 0.10);
+        convexParams.put("muFast", 0.60);
+        convexParams.put("muSlow", 0.015);
+        convexParams.put("muA", 0.15);
         availableModels.add(new ModelInfo(
                 "convex_comb",
                 "Convex Combination",
                 "COMBINATION FILTER",
-                "Sigmoidal convex combination of fast (mu=0.50) and slow (mu=0.05) adaptive filters (Arenas-Garcia et al.).",
+                "Sigmoidal convex combination of fast (mu=0.60) and slow (mu=0.015) adaptive filters (Arenas-Garcia et al.).",
                 ModelInfo.ModelType.CONVEX_COMBINATION,
                 convexParams,
                 false

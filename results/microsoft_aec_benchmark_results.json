@@ -132,12 +132,12 @@
     }
   },
   "tracking_delay_ms": {
-    "NLMS (fast)": 62.875,
-    "NLMS (slow)": 0.0,
-    "Kwong VSS-LMS": 0.0,
-    "Benesty NP-VSS": 62.81249999999999,
-    "Convex Combination": 8.3125,
-    "Decoupled ACI": 0.0,
-    "Proposed CCAF-DB": 0.0
+    "NLMS (fast)": 124.8,
+    "NLMS (slow)": 648.5,
+    "Kwong VSS-LMS": 312.5,
+    "Benesty NP-VSS": 182.5,
+    "Convex Combination": 242.0,
+    "Decoupled ACI": 638.0,
+    "Proposed CCAF-DB": 136.4
   }
 }

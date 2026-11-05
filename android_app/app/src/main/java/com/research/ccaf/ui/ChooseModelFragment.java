@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.research.ccaf.R;
 import com.research.ccaf.dsp.ModelInfo;
 import com.research.ccaf.dsp.ModelManager;
+import com.research.ccaf.dsp.UniversalAudioHelper;
 
 import org.json.JSONObject;
 
@@ -60,6 +61,12 @@ public class ChooseModelFragment extends Fragment {
     private RecyclerView rvModels;
     private ModelAdapter modelAdapter;
     private TextView tvCurrentActiveHeader;
+    private Button btnAuditionModel;
+    private Button btnAuditionShift;
+
+    private final UniversalAudioHelper.SeamlessShifterEngine auditionEngine = new UniversalAudioHelper.SeamlessShifterEngine();
+    private double[] cachedDemoRaw;
+    private double[] cachedDemoFiltered;
 
     private final ActivityResultLauncher<String> jsonFilePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), this::onJsonFileSelected);
@@ -88,13 +95,106 @@ public class ChooseModelFragment extends Fragment {
         // Sub-interface 2 views
         rvModels = view.findViewById(R.id.rvModels);
         tvCurrentActiveHeader = view.findViewById(R.id.tvCurrentActiveHeader);
+        btnAuditionModel = view.findViewById(R.id.btnAuditionModel);
+        btnAuditionShift = view.findViewById(R.id.btnAuditionShift);
 
         setupInterfaceToggle();
         setupSelectModelList();
+        setupAuditionPlayer();
         setupAddNewModelListeners();
         updateActiveHeader();
 
         return view;
+    }
+
+    private void setupAuditionPlayer() {
+        if (btnAuditionModel == null) return;
+
+        btnAuditionModel.setOnClickListener(v -> {
+            if (!auditionEngine.isPlaying()) {
+                startAuditionPlayback();
+            } else {
+                auditionEngine.stop();
+                btnAuditionModel.setText("▶️ AUDITION ACTIVE MODEL");
+                btnAuditionShift.setEnabled(false);
+            }
+        });
+
+        if (btnAuditionShift != null) {
+            btnAuditionShift.setOnClickListener(v -> {
+                if (auditionEngine.isModelSelected()) {
+                    auditionEngine.shiftToOriginal();
+                    btnAuditionShift.setText("🔈 ORIGINAL");
+                    btnAuditionShift.setBackgroundColor(0xFF0F766E);
+                } else {
+                    auditionEngine.shiftToModel();
+                    btnAuditionShift.setText("🎧 MODEL");
+                    btnAuditionShift.setBackgroundColor(0xFFD97706);
+                }
+            });
+        }
+    }
+
+    private void startAuditionPlayback() {
+        btnAuditionModel.setText("⏳ Processing audio...");
+        new Thread(() -> {
+            try {
+                if (cachedDemoRaw == null) {
+                    java.io.InputStream is = requireContext().getAssets().open("microsoft_aec_sample.wav");
+                    com.research.ccaf.dsp.WavFileHelper.WavData wav = com.research.ccaf.dsp.WavFileHelper.readWav(is);
+                    cachedDemoRaw = wav.samples;
+                }
+
+                com.research.ccaf.dsp.AdaptiveFilter filter = ModelManager.getInstance().getActiveFilter();
+                if (filter != null) filter.reset();
+
+                cachedDemoFiltered = new double[cachedDemoRaw.length];
+                for (int i = 0; i < cachedDemoRaw.length; i++) {
+                    com.research.ccaf.dsp.AdaptiveFilter.Output out = (filter != null) ? filter.process(cachedDemoRaw[i]) : null;
+                    cachedDemoFiltered[i] = (out != null) ? out.error : cachedDemoRaw[i];
+                }
+
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        auditionEngine.startSeamlessPlayback(cachedDemoRaw, cachedDemoFiltered, 16000, () -> {
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    btnAuditionModel.setText("▶️ AUDITION ACTIVE MODEL");
+                                    btnAuditionShift.setEnabled(false);
+                                });
+                            }
+                        });
+                        auditionEngine.shiftToModel();
+                        btnAuditionModel.setText("⏹️ STOP AUDITION");
+                        btnAuditionShift.setEnabled(true);
+                        btnAuditionShift.setText("🎧 MODEL");
+                        btnAuditionShift.setBackgroundColor(0xFFD97706);
+                    });
+                }
+            } catch (Exception e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        btnAuditionModel.setText("▶️ AUDITION ACTIVE MODEL");
+                        Toast.makeText(getContext(), "Audition error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private void reFilterAuditionIfPlaying() {
+        if (!auditionEngine.isPlaying() || cachedDemoRaw == null) return;
+        new Thread(() -> {
+            com.research.ccaf.dsp.AdaptiveFilter filter = ModelManager.getInstance().getActiveFilter();
+            if (filter != null) filter.reset();
+            double[] newFilt = new double[cachedDemoRaw.length];
+            for (int i = 0; i < cachedDemoRaw.length; i++) {
+                com.research.ccaf.dsp.AdaptiveFilter.Output out = (filter != null) ? filter.process(cachedDemoRaw[i]) : null;
+                newFilt[i] = (out != null) ? out.error : cachedDemoRaw[i];
+            }
+            cachedDemoFiltered = newFilt;
+            auditionEngine.updateModelTrack(newFilt);
+        }).start();
     }
 
     private void setupInterfaceToggle() {
@@ -115,9 +215,22 @@ public class ChooseModelFragment extends Fragment {
         modelAdapter = new ModelAdapter(ModelManager.getInstance().getAvailableModels(), model -> {
             ModelManager.getInstance().selectModel(model);
             updateActiveHeader();
+            reFilterAuditionIfPlaying();
             Toast.makeText(getContext(), "Activated model: " + model.getName(), Toast.LENGTH_SHORT).show();
         });
         rvModels.setAdapter(modelAdapter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        auditionEngine.stop();
+        if (btnAuditionModel != null) {
+            btnAuditionModel.setText("▶️ AUDITION ACTIVE MODEL");
+        }
+        if (btnAuditionShift != null) {
+            btnAuditionShift.setEnabled(false);
+        }
     }
 
     private void updateActiveHeader() {

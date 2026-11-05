@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ public class SelectFileFragment extends Fragment {
 
     private DualWaveformView fileWaveformView;
     private Button btnSelectFile;
+    private Button btnLoadDemoAudio;
     private Button btnShiftOriginal;
     private Button btnShiftModel;
     private Button btnPlaySeamless;
@@ -50,6 +52,8 @@ public class SelectFileFragment extends Fragment {
     private TextView tvActiveModelTag;
     private TextView tvProcessingStats;
     private ProgressBar progressBar;
+    private LinearLayout layoutQuickModelBarFile;
+    private final java.util.List<Button> quickModelButtons = new java.util.ArrayList<>();
 
     private final UniversalAudioHelper.SeamlessShifterEngine shifterEngine = new UniversalAudioHelper.SeamlessShifterEngine();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -70,6 +74,7 @@ public class SelectFileFragment extends Fragment {
 
         fileWaveformView = view.findViewById(R.id.fileWaveformView);
         btnSelectFile = view.findViewById(R.id.btnSelectFile);
+        btnLoadDemoAudio = view.findViewById(R.id.btnLoadDemoAudio);
         btnShiftOriginal = view.findViewById(R.id.btnShiftOriginal);
         btnShiftModel = view.findViewById(R.id.btnShiftModel);
         btnPlaySeamless = view.findViewById(R.id.btnPlaySeamless);
@@ -78,14 +83,17 @@ public class SelectFileFragment extends Fragment {
         tvActiveModelTag = view.findViewById(R.id.tvActiveModelTagFile);
         tvProcessingStats = view.findViewById(R.id.tvProcessingStats);
         progressBar = view.findViewById(R.id.progressBar);
+        layoutQuickModelBarFile = view.findViewById(R.id.layoutQuickModelBarFile);
 
         setupListeners();
+        setupQuickModelBar();
         updateModelTag();
 
         ModelManager.getInstance().addListener((newModel, filterInstance) -> {
             if (isAdded()) {
                 mainHandler.post(() -> {
                     updateModelTag();
+                    updateQuickModelButtons();
                     if (originalSamples != null && originalSamples.length > 0) {
                         applyActiveModelToFile();
                     }
@@ -94,6 +102,56 @@ public class SelectFileFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void setupQuickModelBar() {
+        if (layoutQuickModelBarFile == null || getContext() == null) return;
+        layoutQuickModelBarFile.removeAllViews();
+        quickModelButtons.clear();
+
+        java.util.List<ModelInfo> models = ModelManager.getInstance().getAvailableModels();
+        for (ModelInfo m : models) {
+            Button btn = new Button(getContext());
+            btn.setText(m.getName());
+            btn.setTextSize(11.0f);
+            btn.setAllCaps(false);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    (int) (40 * getResources().getDisplayMetrics().density)
+            );
+            lp.setMargins(0, 0, (int) (8 * getResources().getDisplayMetrics().density), 0);
+            btn.setLayoutParams(lp);
+
+            btn.setOnClickListener(v -> ModelManager.getInstance().selectModel(m));
+
+            quickModelButtons.add(btn);
+            layoutQuickModelBarFile.addView(btn);
+        }
+        updateQuickModelButtons();
+    }
+
+    private void updateQuickModelButtons() {
+        ModelInfo active = ModelManager.getInstance().getActiveModelInfo();
+        if (active == null) return;
+        java.util.List<ModelInfo> models = ModelManager.getInstance().getAvailableModels();
+
+        for (int i = 0; i < quickModelButtons.size() && i < models.size(); i++) {
+            Button btn = quickModelButtons.get(i);
+            ModelInfo m = models.get(i);
+            boolean isSelected = active.getId().equals(m.getId());
+
+            if (isSelected) {
+                if (m.isProposed()) {
+                    btn.setBackgroundColor(0xFF10B981); // Emerald
+                } else {
+                    btn.setBackgroundColor(0xFF0284C7); // Sky Blue
+                }
+                btn.setTextColor(0xFFFFFFFF);
+            } else {
+                btn.setBackgroundColor(0xFF334155); // Slate Gray
+                btn.setTextColor(0xFFCBD5E1);
+            }
+        }
     }
 
     private void updateModelTag() {
@@ -106,6 +164,10 @@ public class SelectFileFragment extends Fragment {
     private void setupListeners() {
         // Universal Audio selection (accepts audio/*, wav, mp3, aac, flac, m4a, ogg, webm)
         btnSelectFile.setOnClickListener(v -> filePickerLauncher.launch("audio/*"));
+
+        if (btnLoadDemoAudio != null) {
+            btnLoadDemoAudio.setOnClickListener(v -> loadDemoAudioFromAssets());
+        }
 
         // Instant Shifter: Shift to Original
         btnShiftOriginal.setOnClickListener(v -> {
@@ -146,6 +208,32 @@ public class SelectFileFragment extends Fragment {
 
         // Save New File
         btnSaveNewFile.setOnClickListener(v -> saveProcessedAudioFile());
+    }
+
+    private void loadDemoAudioFromAssets() {
+        progressBar.setVisibility(View.VISIBLE);
+        tvFileInfo.setText("Loading demo AEC benchmark audio from assets...");
+
+        new Thread(() -> {
+            try {
+                java.io.InputStream is = requireContext().getAssets().open("microsoft_aec_sample.wav");
+                WavFileHelper.WavData wav = WavFileHelper.readWav(is);
+                originalSamples = wav.samples;
+                sampleRate = wav.sampleRate;
+                loadedFileName = "microsoft_aec_sample.wav (Demo AEC)";
+
+                mainHandler.post(() -> {
+                    tvFileInfo.setText(String.format(Locale.US, "Loaded: %s (%.1fs, %d Hz)",
+                            loadedFileName, (float) originalSamples.length / sampleRate, sampleRate));
+                    applyActiveModelToFile();
+                });
+            } catch (Exception e) {
+                mainHandler.post(() -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Error loading demo audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     private void onFileSelected(Uri uri) {
@@ -217,6 +305,11 @@ public class SelectFileFragment extends Fragment {
             }
 
             double erle = 10.0 * Math.log10(Math.max(1e-6, powerRaw) / Math.max(1e-6, powerFilt));
+
+            // Instantly hot-swap model track in running playback engine
+            if (shifterEngine.isPlaying()) {
+                shifterEngine.updateModelTrack(modelProcessedSamples);
+            }
 
             mainHandler.post(() -> {
                 progressBar.setVisibility(View.GONE);

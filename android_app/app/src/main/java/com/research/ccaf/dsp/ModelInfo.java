@@ -51,12 +51,12 @@ public class ModelInfo implements Serializable {
         switch (type) {
             case PROPOSED_CCAF_DB: {
                 int taps = getParamInt("taps", 64);
-                double muMin = getParam("muMin", 0.05);
-                double muMax = getParam("muMax", 0.50);
-                double gamma = getParam("gamma", 0.005);
+                double muMin = getParam("muMin", 0.03);
+                double muMax = getParam("muMax", 0.55);
+                double gamma = getParam("gamma", 0.003);
                 double alpha = getParam("alpha", 0.10);
                 double tau = getParam("tau", 0.04);
-                double kappa = getParam("kappa", 8.0);
+                double kappa = getParam("kappa", 6.0);
                 return new CCAFDeadBandFilter(taps, muMin, muMax, gamma, alpha, tau, kappa);
             }
             case DECOUPLED_ACI: {
@@ -72,30 +72,30 @@ public class ModelInfo implements Serializable {
                 return NLMSFilter.createSlow();
             case KWONG_VSS: {
                 int taps = getParamInt("taps", 64);
-                double muMin = getParam("muMin", 0.005);
-                double muMax = getParam("muMax", 0.50);
+                double muMin = getParam("muMin", 0.01);
+                double muMax = getParam("muMax", 0.60);
                 double a = getParam("alphaVss", 0.97);
-                double g = getParam("gammaVss", 0.05);
+                double g = getParam("gammaVss", 0.15);
                 return new KwongVSSFilter(taps, muMin, muMax, a, g);
             }
             case BENESTY_VSS: {
                 int taps = getParamInt("taps", 64);
                 double muMin = getParam("muMin", 0.01);
-                double muMax = getParam("muMax", 0.50);
+                double muMax = getParam("muMax", 0.55);
                 double lambda = getParam("lambda", 0.98);
                 return new BenestyVSSFilter(taps, muMin, muMax, lambda);
             }
             case CONVEX_COMBINATION:
-                return new ConvexCombinationFilter();
+                return new ConvexCombinationFilter(64, 0.60, 0.015, 0.15);
             case CUSTOM_IMPORTED:
             default: {
                 int taps = getParamInt("taps", 64);
-                double muMin = getParam("muMin", 0.05);
-                double muMax = getParam("muMax", 0.50);
-                double gamma = getParam("gamma", 0.005);
+                double muMin = getParam("muMin", 0.03);
+                double muMax = getParam("muMax", 0.55);
+                double gamma = getParam("gamma", 0.003);
                 double alpha = getParam("alpha", 0.10);
                 double tau = getParam("tau", 0.04);
-                double kappa = getParam("kappa", 8.0);
+                double kappa = getParam("kappa", 6.0);
                 return new CCAFDeadBandFilter(taps, muMin, muMax, gamma, alpha, tau, kappa);
             }
         }

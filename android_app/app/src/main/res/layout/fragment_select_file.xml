@@ -23,17 +23,58 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Select File Button (Universal audio support: WAV, MP3, AAC, FLAC, M4A, OGG) -->
-        <Button
-            android:id="@+id/btnSelectFile"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#0284C7"
-            android:text="SELECT AUDIO (WAV, MP3, AAC, FLAC, M4A)"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
+        <!-- Quick Model Shifter Bar -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="⚡ Shift Active DSP Model (Tap to switch audio filter live):"
+            android:textColor="@color/accent_emerald"
+            android:textSize="12sp"
             android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/layoutQuickModelBarFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSelectFile"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:backgroundTint="#0284C7"
+                android:text="SELECT FILE"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnLoadDemoAudio"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="#0F766E"
+                android:text="🎵 LOAD DEMO AEC"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- File Name and Details -->
         <TextView

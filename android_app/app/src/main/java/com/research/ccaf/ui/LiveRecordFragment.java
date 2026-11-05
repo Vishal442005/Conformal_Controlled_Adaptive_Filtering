@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +57,9 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
     private final UniversalAudioHelper.SeamlessShifterEngine shifterEngine = new UniversalAudioHelper.SeamlessShifterEngine();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    private LinearLayout layoutQuickModelBarLive;
+    private final java.util.List<Button> quickModelButtons = new java.util.ArrayList<>();
+
     private double[] lastRecordedRaw;
     private double[] lastRecordedFiltered;
     private double runningPowerRaw = 1e-6;
@@ -76,19 +80,76 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
         tvMetrics = view.findViewById(R.id.tvMetrics);
         tvStatus = view.findViewById(R.id.tvStatus);
 
+        layoutQuickModelBarLive = view.findViewById(R.id.layoutQuickModelBarLive);
+
         audioEngine = new AudioRecordPlayerEngine();
         audioEngine.setFrameListener(this);
 
         setupListeners();
+        setupQuickModelBar();
         updateActiveModelDisplay();
 
         ModelManager.getInstance().addListener((newModel, filterInstance) -> {
             if (isAdded()) {
-                mainHandler.post(this::updateActiveModelDisplay);
+                mainHandler.post(() -> {
+                    updateActiveModelDisplay();
+                    updateQuickModelButtons();
+                    reprocessLiveRecordingWithModel(newModel, filterInstance);
+                });
             }
         });
 
         return view;
+    }
+
+    private void setupQuickModelBar() {
+        if (layoutQuickModelBarLive == null || getContext() == null) return;
+        layoutQuickModelBarLive.removeAllViews();
+        quickModelButtons.clear();
+
+        java.util.List<ModelInfo> models = ModelManager.getInstance().getAvailableModels();
+        for (ModelInfo m : models) {
+            Button btn = new Button(getContext());
+            btn.setText(m.getName());
+            btn.setTextSize(11.0f);
+            btn.setAllCaps(false);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    (int) (40 * getResources().getDisplayMetrics().density)
+            );
+            lp.setMargins(0, 0, (int) (8 * getResources().getDisplayMetrics().density), 0);
+            btn.setLayoutParams(lp);
+
+            btn.setOnClickListener(v -> ModelManager.getInstance().selectModel(m));
+
+            quickModelButtons.add(btn);
+            layoutQuickModelBarLive.addView(btn);
+        }
+        updateQuickModelButtons();
+    }
+
+    private void updateQuickModelButtons() {
+        ModelInfo active = ModelManager.getInstance().getActiveModelInfo();
+        if (active == null) return;
+        java.util.List<ModelInfo> models = ModelManager.getInstance().getAvailableModels();
+
+        for (int i = 0; i < quickModelButtons.size() && i < models.size(); i++) {
+            Button btn = quickModelButtons.get(i);
+            ModelInfo m = models.get(i);
+            boolean isSelected = active.getId().equals(m.getId());
+
+            if (isSelected) {
+                if (m.isProposed()) {
+                    btn.setBackgroundColor(0xFF10B981); // Emerald
+                } else {
+                    btn.setBackgroundColor(0xFF0284C7); // Sky Blue
+                }
+                btn.setTextColor(0xFFFFFFFF);
+            } else {
+                btn.setBackgroundColor(0xFF334155); // Slate Gray
+                btn.setTextColor(0xFFCBD5E1);
+            }
+        }
     }
 
     private void updateActiveModelDisplay() {
@@ -96,6 +157,74 @@ public class LiveRecordFragment extends Fragment implements AudioRecordPlayerEng
         if (active != null) {
             tvActiveModelTag.setText("Active Model: " + active.getName() + " [" + active.getCategory() + "]");
         }
+    }
+
+    private void reprocessLiveRecordingWithModel(ModelInfo newModel, AdaptiveFilter filterInstance) {
+        if (lastRecordedRaw == null || lastRecordedRaw.length == 0 || filterInstance == null) {
+            return;
+        }
+
+        tvStatus.setText("⚡ Applying " + newModel.getName() + " to recorded audio...");
+
+        new Thread(() -> {
+            AdaptiveFilter filter = newModel.createFilterInstance();
+            filter.reset();
+
+            final double[] newFiltered = new double[lastRecordedRaw.length];
+            int displayPoints = 256;
+            double[] dispOrig = new double[displayPoints];
+            double[] dispFilt = new double[displayPoints];
+            int step = Math.max(1, lastRecordedRaw.length / displayPoints);
+
+            double pRaw = 1e-6;
+            double pFilt = 1e-6;
+            AdaptiveFilter.Output lastOut = null;
+
+            for (int i = 0; i < lastRecordedRaw.length; i++) {
+                double raw = lastRecordedRaw[i];
+                AdaptiveFilter.Output out = filter.process(raw);
+                double cleaned = out.error;
+                newFiltered[i] = cleaned;
+                lastOut = out;
+
+                pRaw += raw * raw;
+                pFilt += cleaned * cleaned;
+
+                int dIdx = i / step;
+                if (dIdx < displayPoints && i % step == 0) {
+                    dispOrig[dIdx] = raw;
+                    dispFilt[dIdx] = cleaned;
+                }
+            }
+
+            lastRecordedFiltered = newFiltered;
+
+            // Instantly hot-swap audio into currently playing shifterEngine!
+            if (shifterEngine.isPlaying()) {
+                shifterEngine.updateModelTrack(newFiltered);
+            }
+
+            final double finalErle = 10.0 * Math.log10(Math.max(1e-6, pRaw) / Math.max(1e-6, pFilt));
+            final AdaptiveFilter.Output finalOut = lastOut;
+
+            mainHandler.post(() -> {
+                if (!isAdded()) return;
+                waveformView.updateData(dispOrig, dispFilt);
+                tvStatus.setText("⚡ Active model shifted to: " + newModel.getName() + " (Audio re-filtered)");
+                Toast.makeText(getContext(), "Shifted to: " + newModel.getName(), Toast.LENGTH_SHORT).show();
+
+                if (finalOut != null && tvMetrics != null) {
+                    double cov = filter.getEmpiricalCoverage();
+                    double wink = filter.getWinklerScore();
+                    double surge = Math.abs(finalOut.error) / Math.max(1e-4, (finalOut.upperBound - finalOut.lowerBound) / 3.29);
+                    String deadBand = (cov >= 90.0) ? "SLEEP" : "ACTIVE";
+
+                    tvMetrics.setText(String.format(Locale.US,
+                            "Step Size μ: %.4f | Coverage: %.1f%% | Winkler: %.3f\nERLE: %+.1f dB | Surge: %.2f σ | Dead-band: %s | FLOPs: 133",
+                            finalOut.stepSize, cov, wink, finalErle, surge, deadBand));
+                }
+            });
+        }).start();
     }
 
     private void setupListeners() {

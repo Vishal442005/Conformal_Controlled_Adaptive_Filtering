@@ -30,7 +30,7 @@ public class BenestyVSSFilter extends AbstractAdaptiveFilter {
     }
 
     public BenestyVSSFilter() {
-        this(64, 0.01, 0.50, 0.98);
+        this(64, 0.01, 0.55, 0.98);
     }
 
     @Override

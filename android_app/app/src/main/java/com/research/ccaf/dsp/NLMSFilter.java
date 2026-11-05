@@ -19,11 +19,11 @@ public class NLMSFilter extends AbstractAdaptiveFilter {
     }
 
     public static NLMSFilter createFast() {
-        return new NLMSFilter(64, 0.50, true);
+        return new NLMSFilter(64, 0.60, true);
     }
 
     public static NLMSFilter createSlow() {
-        return new NLMSFilter(64, 0.05, false);
+        return new NLMSFilter(64, 0.015, false);
     }
 
     @Override

@@ -1,0 +1,35 @@
+{
+  "title": "Conformal-Controlled Adaptive Filtering: Distribution-Free Uncertainty Bounds and Coverage-Driven Step-Size Control",
+  "description": "Official open-source release v1.2.0 for Conformal-Controlled Adaptive Filtering (CCAF). Includes complete simulation pipelines, baseline algorithms (NLMS, RLS, VSS, Convex Combination), real-world physical benchmarks (Microsoft AEC Challenge, Aachen AIR 1.4, PhysioNet MIT-BIH, EEGdenoiseNet), and Android edge mobile deployment (APK v1.2.0).",
+  "creators": [
+    {
+      "name": "Chandel, Vishal",
+      "affiliation": "Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India",
+      "orcid": "0009-0006-0552-8551"
+    },
+    {
+      "name": "Singh, Jyotiraditya",
+      "affiliation": "Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India"
+    },
+    {
+      "name": "Thakur, Ajeet",
+      "affiliation": "Department of Electronics & Communication, J.N.G.E.C., Sundernagar, Himachal Pradesh, India"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "version": "v1.2.0",
+  "upload_type": "software",
+  "publication_date": "2026-11-05",
+  "keywords": [
+    "adaptive filtering",
+    "conformal prediction",
+    "adaptive conformal inference",
+    "distribution-free uncertainty quantification",
+    "variable step-size NLMS",
+    "acoustic echo cancellation",
+    "EEG denoising",
+    "Wiener filter",
+    "Schur-Cohn lattice stability"
+  ]
+}

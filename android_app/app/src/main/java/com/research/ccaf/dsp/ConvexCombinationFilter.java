@@ -19,7 +19,7 @@ public class ConvexCombinationFilter implements AdaptiveFilter {
     }
 
     public ConvexCombinationFilter() {
-        this(64, 0.50, 0.05, 0.10);
+        this(64, 0.60, 0.015, 0.15);
     }
 
     @Override

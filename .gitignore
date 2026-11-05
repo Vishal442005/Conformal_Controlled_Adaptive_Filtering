@@ -47,6 +47,48 @@ paper_latex/
 create_paper_docx.py
 convert_docs_to_pdf.ps1
 tools/
+Submission_main/
+supplementary_main/
+submission_main/
+submission_main
+IEEE Signal processing/
+downloaded_papers/
+benchmarks/
+
+# Local cache & intermediate data
+*.npz
+air_database_aec_benchmark_updated.png
+results/pdf_render_checks/
+results/*_verify.png
+
+# Android build caches & local properties
+android_app/.gradle/
+android_app/local.properties
+.gradle/
+
+# One-off manuscript formatting and figure maintenance scripts (root only)
+/add_2025_2026_section.py
+/apply_ultrabrief_captions.py
+/assemble_elsevier_manuscript.py
+/build_verified_fig1.py
+/copy_elsevier_figures.py
+/fix_sec6_text.py
+/fix_table_mc.py
+/generate_2025_2026_sota_comparative_benchmark.py
+/get_ecg_metrics.py
+/inspect_candidate_figures.py
+/render_enlarged_supplementary_figures.py
+/render_perfect_air_benchmark.py
+/render_perfect_fig1.py
+/render_perfect_fig5.py
+/test_fig4_design.py
+/update_all_air_benchmark_pdfs.py
+/update_paper_latex_captions_and_body.py
+/update_submission_appendix.py
+/update_supplementary_author.py
+/update_verify_sota.py
+/update_word_with_2025_2026.py
+/verify_fig1_monochrome.py
 
 # OS-specific
 .DS_Store

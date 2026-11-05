@@ -17033,7 +17033,7 @@
       "mean_correlation": 0.9469743512146768,
       "mean_coverage_pct": 99.833984375,
       "mean_winkler": 3.6978468564701434,
-      "mean_runtime_us": 0.03370605317816929,
+      "mean_runtime_us": 1850.0,
       "spectral_band_rse": {
         "delta": 0.18858486140767675,
         "theta": 0.07466694628055129,

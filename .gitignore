@@ -54,6 +54,8 @@ submission_main
 IEEE Signal processing/
 downloaded_papers/
 benchmarks/
+updated_submission_TIM/
+updated_submission_TSP/
 
 # Local cache & intermediate data
 *.npz
